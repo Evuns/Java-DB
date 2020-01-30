@@ -5,7 +5,7 @@ I. My SQL
 
 _Course topics:_
 
-- <a href="https://github.com/Evuns/JavaOOP/tree/master/src/WorkingWithAbstraction" target="_blank">Database Introduction</a>
+- <a href="https://github.com/Evuns/Java-DB/tree/master/DatabaseIntroduction" target="_blank">Database Introduction</a>
 
 2.Basic CRUD
 
