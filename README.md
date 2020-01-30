@@ -2,6 +2,7 @@
 My SQL &amp; Spring Data
 
 I. My SQL
+
 _Course topics:_
 
 - <a href="https://github.com/Evuns/JavaOOP/tree/master/src/WorkingWithAbstraction" target="_blank">Database Introduction</a>
