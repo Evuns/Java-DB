@@ -1,0 +1,6 @@
+ALTER TABLE `products` 
+ADD INDEX `id_idx` (`category_id` ASC);
+ALTER TABLE `products` 
+ADD CONSTRAINT `id`
+  FOREIGN KEY (`category_id`)
+  REFERENCES `categories` (`id`);
