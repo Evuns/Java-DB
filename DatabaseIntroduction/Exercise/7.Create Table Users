@@ -1,0 +1,12 @@
+CREATE TABLE `users`(`id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+`username` VARCHAR(30) NOT NULL,
+`password` VARCHAR(26) NOT NULL,
+`profile_picture` MEDIUMBLOB,
+`last_login_time` DATETIME NULL,
+`is_deleted` BOOLEAN  NOT NULL);
+INSERT INTO `users` (`username`,`password`, `is_deleted`) VALUES
+('pin','sdnskj52','0'),
+('pik','sdnskj52','1'),
+('puk','sdnskj52','1'),
+('pan','sdnskj52','0'),
+('pet','sdnskj52','1');
