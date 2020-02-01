@@ -1,0 +1,15 @@
+CREATE TABLE `people`(
+ `id` INT PRIMARY KEY AUTO_INCREMENT,
+ `name` VARCHAR(200) NOT NULL,
+ `picture` BLOB(2),
+ `height` DOUBLE(3,2),
+ `weight` DOUBLE(4,2),
+ `gender` CHAR (1) NOT NULL,
+ `birthdate` DATE NOT NULL,
+ `biography` TEXT);
+ INSERT INTO `people` (`name`, `height`, `weight`,`gender`,`birthdate`,`biography`) VALUES(
+ 'Ani',  1.65, 65.21,'f','2000:07:22','jfsdklfjksdjbvcksdbckjwbfwyuwefvhsdchjsdbckKJDNKJWEFC NSDKCNSK'),
+('Eva',  NULL, NULL, 'f','1996:08:15',NULL),
+('Mitko', NULL, NULL, 'm', '1986-12-15', 'dshfksfhk'),
+('Sasho', NULL, NULL, 'm', '1986-12-13', 'sdjshcsk'),
+('Viktor', NULL, NULL, 'm','1985:12:12',NULL);
