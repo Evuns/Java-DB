@@ -1,0 +1,31 @@
+CREATE TABLE `directors`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`director_name` VARCHAR(45) NOT NULL,
+`notes` TEXT);
+CREATE TABLE `genres`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`genre_name` VARCHAR(45) NOT NULL,
+`notes` TEXT);
+CREATE TABLE `categories`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`category_name` VARCHAR(50) NOT NULL,
+`notes` TEXT); 
+CREATE TABLE `movies`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`title` VARCHAR(100) NOT NULL,
+`director_id` INT NOT NULL,
+`copyright_year` YEAR,
+`length` TIME,
+`genre_id` INT NOT NULL,
+`category_id` INT NOT NULL,
+`rating` INT,
+`notes` TEXT(40000));
+  INSERT INTO `categories` (`category_name`) VALUES ('comedy'),('historical'),('animation'),('horror'),('action');
+  INSERT INTO `directors`(`director_name`) VALUES ('Tom'), ('Archy'),('Hichkok'),('Gibson'),('Arrny');
+  INSERT INTO `genres`(`genre_name`) VALUES ('comedy'),('historical'),('animation'),('horror'),('action');
+  INSERT INTO `movies`(`title`,`director_id`,`copyright_year`,`length`, `genre_id`,`category_id`) VALUES
+  ('Henrry VIII', 2, '2008','2:52:15',3,1),
+  ('Bambi', 3, '2006','2:54:18',5,2),
+  ('Nova', 1, '1983',3,1,3),
+  ('Stich', 4, '1998',1-34,1,4),
+  ('Alladin', 5, '2019',2,4,5);
