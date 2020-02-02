@@ -1,0 +1,4 @@
+ALTER TABLE `users`
+CHANGE COLUMN `username` `username` VARCHAR(30) NOT NULL DEFAULT 'pk_users' ,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`);
