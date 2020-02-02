@@ -1,0 +1,73 @@
+CREATE TABLE `categories`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`category` VARCHAR(45) NOT NULL,
+`daily_rate` INT,
+`weekly_rate` INT,
+`monthly_rate` INT,
+`weekend_rate` INT);
+CREATE TABLE `cars`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`plate_number` VARCHAR(10) NOT NULL,
+`make` INT,
+`model` VARCHAR(45),
+`car_year` YEAR,
+`category_id` INT NOT NULL,
+`doors` INT,
+`picture` BLOB,
+`car_condition` VARCHAR (45),
+`available` VARCHAR(45));  
+CREATE TABLE `employees`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`first_name` VARCHAR(45) NOT NULL,
+`last_name` VARCHAR(45) NOT NULL,
+`title` VARCHAR(45) NOT NULL,
+`notes` TEXT);
+CREATE TABLE `customers`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`driver_license_number` INT NOT NULL,
+`full_name` VARCHAR(50) NOT NULL,
+`adress` VARCHAR(100) NOT NULL,
+`city` VARCHAR(11) NOT NULL,
+`zip_code` INT,
+`notes` TEXT);
+CREATE TABLE `rental_orders`(
+`id` INT PRIMARY KEY AUTO_INCREMENT,
+`employee_id` INT NOT NULL,
+`customer_id` INT NOT NULL,
+`car_id` INT NOT NULL,
+`car_condition` VARCHAR(45),
+`tank_level` VARCHAR(10),
+`kilometrage_start` DOUBLE(7,2) NOT NULL,
+`kilometrage_end` DOUBLE(7,2) NOT NULL,
+`total_kilometrage` DOUBLE NOT NULL,
+`start_date` DATE NOT NULL,
+`end_date` DATE NOT NULL,
+`total_days` INT NOT NULL,
+`rate_applied` DOUBLE NOT NULL,
+`tax_rate` DOUBLE NOT NULL,
+`order_status` VARCHAR(10) NOT NULL,
+`notes` TEXT);
+INSERT INTO `cars` (`plate_number`, `make`, `model`, `car_year`, `category_id`, `doors`, `car_condition`, `available`)
+ VALUES ('SA2567PK', '200', 'audi', 1986, '5', '3', 'fine', 'yes');
+INSERT INTO `cars` (`plate_number`, `make`, `model`, `car_year`, `category_id`, `doors`, `car_condition`, `available`)
+ VALUES ('sdmcksc', '100', 'bmw', 1999, '6', '2', 'broken', 'no');
+INSERT INTO `cars` (`plate_number`, `make`, `model`, `car_year`, `category_id`, `doors`, `car_condition`, `available`)
+ VALUES ('sdmksl', '20', 'reno', 2019, '1', '4', 'fine', 'yes');
+INSERT INTO `categories` (`category`, `daily_rate`, `weekly_rate`, `monthly_rate`, `weekend_rate`)
+ VALUES ('nice', '5', '15', '6', '6');
+INSERT INTO `categories` (`category`, `daily_rate`, `weekly_rate`, `monthly_rate`, `weekend_rate`)
+ VALUES ('old', '6', '6', '4', '6');
+INSERT INTO `categories` (`category`, `daily_rate`, `weekly_rate`, `monthly_rate`, `weekend_rate`) 
+VALUES ('premium', '2', '8', '2', '6');
+INSERT INTO `customers` (`driver_license_number`, `full_name`, `adress`, `city`)
+ VALUES ('45646', 'Aleksanar Milchev', 'ul. Petar slavov 18', 'Sofia');
+INSERT INTO `customers` (`driver_license_number`, `full_name`, `adress`, `city`)
+ VALUES ('15105', 'Ivan Ivanov', 'Aleksandur I 18', 'Sofia');
+INSERT INTO `customers` (`driver_license_number`, `full_name`, `adress`, `city`)
+ VALUES ('151364', 'Pesho Peshev', 'jdklsnf', 'Sofia');
+ INSERT INTO `employees` (`first_name`, `last_name`, `title`) VALUES ('Georgi', 'Ivanov', 'worker');
+INSERT INTO `employees` (`first_name`, `last_name`, `title`) VALUES ('Ivan', 'Georgiev', 'chef');
+INSERT INTO `employees` (`first_name`, `last_name`, `title`) VALUES ('Pesho', 'Peshov', 'worker');
+INSERT INTO `rental_orders` (`employee_id`, `customer_id`, `car_id`, `car_condition`, `tank_level`, `kilometrage_start`, `kilometrage_end`, `total_kilometrage`, `start_date`, `end_date`, `total_days`, `rate_applied`, `tax_rate`, `order_status`) VALUES ('5', '2', '5', 'fine', '50', '35625.22', '32510', '200', '2020-1-12', '2020-2-13', '15', '5', '8', 'complete');
+INSERT INTO `rental_orders` (`employee_id`, `customer_id`, `car_id`, `car_condition`, `tank_level`, `kilometrage_start`, `kilometrage_end`, `total_kilometrage`, `start_date`, `end_date`, `total_days`, `rate_applied`, `tax_rate`, `order_status`) VALUES ('3', '6', '6', 'broke', '80', '99.89', '22520', '15', '1998-08-14', '1998-09-1', '18', '6', '16', 'in process');
+INSERT INTO `rental_orders` (`employee_id`, `customer_id`, `car_id`, `car_condition`, `tank_level`, `kilometrage_start`, `kilometrage_end`, `total_kilometrage`, `start_date`, `end_date`, `total_days`, `rate_applied`, `tax_rate`, `order_status`) VALUES ('1', '8', '14', 'fine', '60', '1560.20', '2312', '335', '2019-12-29', '2020-1-5', '16', '12', '32', 'complete');
