@@ -5,9 +5,9 @@ I. My SQL
 
 _Course topics:_
 
-- <a href="https://github.com/Evuns/Java-DB/tree/master/DatabaseIntroduction" target="_blank">Database Introduction</a>
+<a href="https://github.com/Evuns/Java-DB/tree/master/DatabaseIntroduction" target="_blank">1.Database Introduction</a>
 
-2.Basic CRUD
+<a href="https://github.com/Evuns/Java-DB/tree/master/Basic%20CRUD" target="_blank">2.Basic CRUD</a>
 
 3.Built in Functions
 
