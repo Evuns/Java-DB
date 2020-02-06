@@ -7,7 +7,7 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/DatabaseIntroduction" target="_blank">1.Database Introduction</a>
 
-<a href="https://https://github.com/Evuns/Java-DB/tree/master/MySQL/Basic%20CRUD" target="_blank">2.Basic CRUD</a>
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Basic%20CRUD" target="_blank">2.Basic CRUD</a>
 
 3.Built in Functions
 
