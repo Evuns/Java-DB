@@ -1,0 +1,5 @@
+CREATE VIEW `v_appetizers` AS
+SELECT COUNT(`category_id`) AS 'appetizers', `price` FROM `products`
+WHERE `category_id` = 2 AND `price` > 8;
+
+SELECT `appetizers` FROM `v_appetizers`;
