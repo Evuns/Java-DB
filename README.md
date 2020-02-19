@@ -11,7 +11,7 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Built-in%20Functions" target="_blank">3.Built in Functions</a>
 
-4.Data Aggregation
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/DataAggregation" target="_blank">4.Data Aggregation</a>
 
 5.Table Relations
 
