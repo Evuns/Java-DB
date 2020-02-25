@@ -1,0 +1,10 @@
+ SELECT department_id, salary  AS third_highest_salary
+ FROM employees AS es
+ WHERE 
+ (SELECT employee_id FROM employees AS inside
+ WHERE inside.department_id = es.department_id
+ GROUP BY salary
+ ORDER BY salary DESC LIMIT 1 OFFSET 2
+ ) = employee_id
+GROUP BY department_id
+ORDER BY department_id;
