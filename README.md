@@ -13,7 +13,7 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/DataAggregation" target="_blank">4.Data Aggregation</a>
 
-5.Table Relations
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Table%20Relations" target="_blank">5.Table Relations</a>
 
 6.Subqueries and Joins
 
