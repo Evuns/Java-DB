@@ -1,0 +1,6 @@
+ SELECT f.`starting_point` AS 'route_starting_point', 
+ f.`end_point` AS 'route_ending_point', f.`leader_id`, 
+ CONCAT(s.`first_name`, ' ', s.`last_name`) AS 'leader_name'
+ FROM `routes` AS f
+ JOIN `campers` AS s
+ ON s.`id` = f.`leader_id`;
