@@ -1,0 +1,6 @@
+SELECT f.`town_id`,`name` AS 'town_name', `address_text`
+FROM `towns` AS f
+JOIN `addresses` AS s
+ON f.`town_id` = s.`town_id`
+WHERE f.`town_id` IN (9,15,32)
+ORDER BY f.`town_id`, `address_id`;
