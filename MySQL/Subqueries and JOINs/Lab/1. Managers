@@ -1,0 +1,7 @@
+SELECT f.`manager_id` AS `employee_id`, CONCAT (s.`first_name`, ' ' , s.`last_name`) AS 'full_name',
+f.`department_id`,f.`name` AS `department_name`
+FROM `departments` AS f
+JOIN `employees` AS s
+ON f.`manager_id` = s.`employee_id`
+ORDER BY `employee_id`
+LIMIT 5;
