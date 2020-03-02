@@ -1,0 +1,6 @@
+SELECT s.mountain_range,f.peak_name, f.elevation AS 'peak_elevation' 
+FROM `peaks` AS f
+JOIN `mountains` AS s
+ON f.mountain_id = s.id
+WHERE s.mountain_range = 'Rila'
+ORDER BY `peak_elevation` DESC;
