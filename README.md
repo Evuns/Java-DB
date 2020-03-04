@@ -15,6 +15,6 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Table%20Relations" target="_blank">5.Table Relations</a>
 
-6.Subqueries and Joins
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Subqueries%20and%20JOINs" target="_blank">6.Subqueries and Joins</a>
 
 7.Database Programmability
