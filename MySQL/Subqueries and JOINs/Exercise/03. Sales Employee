@@ -1,0 +1,6 @@
+SELECT `employee_id`, `first_name`, `last_name`, `name` AS `department_name`
+FROM `employees` AS f
+JOIN `departments` AS s
+ON f.department_id = s.department_id
+WHERE `name` = 'Sales'
+ORDER BY `employee_id` DESC;
