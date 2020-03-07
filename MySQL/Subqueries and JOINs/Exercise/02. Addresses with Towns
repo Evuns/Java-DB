@@ -1,0 +1,8 @@
+SELECT `first_name`, `last_name`, `name` AS `town`, `address_text`
+FROM `employees` AS f
+JOIN `addresses` AS s
+ON f.address_id = s.address_id
+JOIN `towns` AS t
+ON s.town_id = t.town_id
+ORDER BY `first_name`,`last_name`
+LIMIT 5; 
