@@ -1,0 +1,7 @@
+SELECT `first_name`, `last_name`, `hire_date`, `name` AS `dept_name`
+FROM `employees` As f
+JOIN `departments` AS s
+ON f.department_id = s.department_id
+WHERE DATE(hire_date) > '1999-01-01'
+AND `name` IN ('Sales','Finance')
+ORDER BY hire_date; 
