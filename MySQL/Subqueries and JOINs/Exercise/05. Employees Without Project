@@ -1,0 +1,7 @@
+SELECT s.`employee_id`, `first_name`
+FROM `employees_projects` AS f
+RIGHT JOIN `employees` AS s
+ON f.`employee_id` = s.`employee_id`
+WHERE `project_id` IS NULL
+ORDER BY s.`employee_id` DESC
+LIMIT 3;
