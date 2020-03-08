@@ -1,0 +1,7 @@
+SELECT `employee_id`, `first_name`, `salary`, `name` AS 'department_name'
+FROM `employees` AS f
+JOIN `departments` AS s
+ON f.department_id = s.department_id
+WHERE `salary` > 15000
+ORDER BY s.`department_id` DESC
+LIMIT 5;
