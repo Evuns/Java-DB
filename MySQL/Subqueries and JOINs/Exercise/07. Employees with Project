@@ -1,0 +1,10 @@
+SELECT f.`employee_id`, `first_name`,`name` AS 'project_name'
+FROM `employees` AS f
+JOIN `employees_projects` AS s
+ON f.employee_id = s.employee_id
+JOIN `projects` AS t
+ON s.project_id = t.project_id
+WHERE DATE(`start_date`) > '2002-08-13'
+AND `end_date` IS NULL
+ORDER BY `first_name`, `name`
+LIMIT 5;
