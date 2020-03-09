@@ -1,0 +1,7 @@
+SELECT f.`employee_id`, f.`first_name`, f.`manager_id`,  s.`first_name` 
+AS 'manager_name'
+FROM `employees` AS f
+JOIN `employees` AS s
+ON f.manager_id = s.employee_id
+WHERE f.`manager_id` IN (3,7)
+ORDER BY f.`first_name`;
