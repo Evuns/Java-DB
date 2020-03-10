@@ -1,0 +1,9 @@
+SELECT `country_code`, `mountain_range`, `peak_name`, `elevation`
+FROM `mountains_countries` AS f
+JOIN `mountains` AS s
+ON f.`mountain_id` = id
+JOIN `peaks` AS t
+ON f.`mountain_id` = t.`mountain_id`
+WHERE `country_code` = 'BG'
+AND `elevation` > 2835
+ORDER BY `elevation` DESC;
