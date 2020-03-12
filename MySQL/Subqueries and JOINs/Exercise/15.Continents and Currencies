@@ -1,0 +1,12 @@
+SELECT f.`continent_code` , f.`currency_code`, COUNT(`country_code`) AS `currency_usage`
+FROM `countries` AS f
+GROUP BY f.`continent_code`, f.`currency_code`
+HAVING `currency_usage` > 1
+    AND `currency_usage` = (SELECT 
+        COUNT(*) AS cu
+    FROM `countries` AS s
+    WHERE s.continent_code = f.continent_code
+    GROUP BY s.currency_code
+    ORDER BY cu DESC
+    LIMIT 1)
+    ORDER BY `continent_code`,`currency_code`;
