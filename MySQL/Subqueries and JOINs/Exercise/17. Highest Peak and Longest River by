@@ -1,0 +1,17 @@
+  SELECT `country_name`, `elevation` AS 'highest_peak_elevation', `length` AS 'longest_river_length'
+    FROM `countries` AS f
+    JOIN `mountains_countries` AS s
+    ON f.country_code = s.country_code
+    JOIN `peaks` AS t
+    ON s.mountain_id = t.mountain_id
+    JOIN `countries_rivers` AS fo
+    ON f.country_code = fo.country_code
+    JOIN `rivers` AS fi
+    ON fo.river_id = fi.id
+    GROUP BY `country_name`
+    HAVING `highest_peak_elevation` = (SELECT 
+        MAX(elevation) )
+        AND `longest_river_length` = (SELECT 
+        MAX(length) )
+	ORDER BY `highest_peak_elevation` DESC, `longest_river_length` DESC, `country_name`
+    LIMIT 5;
