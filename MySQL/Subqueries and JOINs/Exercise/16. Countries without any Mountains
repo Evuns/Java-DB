@@ -1,0 +1,5 @@
+SELECT COUNT(f.`country_code`)
+    FROM `countries` AS f
+    LEFT JOIN `mountains_countries` AS s
+    ON f.country_code = s.country_code
+    WHERE `mountain_id` is NULL;
