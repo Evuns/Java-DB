@@ -1,0 +1,11 @@
+CREATE PROCEDURE usp_get_employees_from_town (town_name VARCHAR(40))
+BEGIN
+SELECT `first_name`,`last_name`
+ FROM `employees` AS f
+ JOIN `addresses` AS t
+ ON f.`address_id` = t.`address_id`
+ JOIN `towns` AS s
+ON t.`town_id` = s.`town_id`
+WHERE town_name = s.`name`
+ORDER BY `first_name`,`last_name`;
+END;
