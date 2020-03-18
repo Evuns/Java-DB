@@ -1,0 +1,8 @@
+CREATE FUNCTION ufn_calculate_future_value(initial_sum DECIMAL(19,4),
+yearly_rate DECIMAL(19,4), years INT)
+RETURNS DOUBLE
+BEGIN
+	DECLARE total DOUBLE;
+    SET total := initial_sum * POW((1 + yearly_rate),years);
+    RETURN total;
+END;
