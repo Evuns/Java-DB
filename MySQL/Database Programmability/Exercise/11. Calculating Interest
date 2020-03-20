@@ -1,0 +1,17 @@
+CREATE FUNCTION ufn_calculate_future_value( amount DECIMAL (19,4), 
+    interest_rate DECIMAL (19,4), years INT)
+    RETURNS FIXED (19,4)
+    BEGIN
+    RETURN amount * POW((1 + interest_rate),years);
+    END;
+
+    CREATE PROCEDURE usp_calculate_future_value_for_account
+    (account_id INT, interest_rate DOUBLE (19,4))
+    BEGIN
+    SELECT s.`id` AS 'account_id', `first_name`, `last_name`, `balance` AS 'current_balance',
+    ufn_calculate_future_value(`balance`,interest_rate,5)
+    FROM `account_holders` AS f
+    JOIN `accounts` AS s
+    ON f.`id` = s.`account_holder_id`
+    WHERE s.`id` = account_id;
+    END;
