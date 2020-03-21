@@ -1,0 +1,17 @@
+CREATE PROCEDURE usp_transfer_money(from_account_id INT, to_account_id INT, amount DECIMAL(19,4)) 
+BEGIN
+	IF from_account_id != to_account_id 
+		AND from_account_id IN (SELECT `id` FROM `accounts`)
+		AND amount > 0 
+		AND amount <= (SELECT `balance` FROM `accounts` WHERE `id` = from_account_id)
+		AND to_account_id IN (SELECT `id` FROM `accounts`)
+    THEN
+		START TRANSACTION;
+		UPDATE `accounts`
+		SET `balance` = `balance` - amount
+		WHERE `id` = from_account_id;
+		UPDATE `accounts`
+		SET `balance` = `balance` + amount
+		WHERE `id` = to_account_id;
+	END IF;
+END;
