@@ -1,0 +1,4 @@
+SELECT `article_id`,`title` FROM `articles` AS a
+JOIN `users_articles` AS u
+ON a.id = u.article_id
+WHERE article_id = user_id;
