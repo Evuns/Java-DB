@@ -1,0 +1,6 @@
+INSERT INTO `likes` (`article_id`,`comment_id`,`user_id`)
+SELECT
+ IF(u.id % 2 = 0, CHAR_LENGTH(`username`), NULL), 
+ IF(u.`id` % 2 <> 0, CHAR_LENGTH(`email`), NULL),
+ `id` FROM `users` AS u 
+WHERE `id` BETWEEN 16 AND 20;
