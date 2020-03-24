@@ -1,0 +1,7 @@
+CREATE VIEW v_try AS
+SELECT `id`,`title`,CONCAT(SUBSTRING(`content`,1,20),'...') AS `summary` FROM `articles`
+ORDER BY CHAR_LENGTH(`content`)  DESC
+LIMIT 3;
+
+SELECT `title`,`summary` FROM v_try
+ORDER BY `id`;
