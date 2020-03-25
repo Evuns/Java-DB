@@ -1,0 +1,7 @@
+SELECT `title`, COUNT(c.`id`) AS 'comments' FROM `articles` As a
+JOIN `comments` AS c
+ON a.id = c.`article_id`
+WHERE `category_id` = 5
+GROUP BY `title`
+ORDER BY `comments` DESC
+LIMIT 1;
