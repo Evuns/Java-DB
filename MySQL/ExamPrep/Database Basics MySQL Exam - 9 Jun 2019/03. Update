@@ -1,0 +1,5 @@
+UPDATE `employees_clients` AS f
+JOIN(SELECT s.`employee_id` FROM `employees_clients` AS s
+ GROUP BY s.`employee_id` ORDER BY COUNT(s.`client_id`),s.`employee_id` LIMIT 1) AS result
+ SET f.`employee_id` = result.employee_id 
+ WHERE f.`employee_id` = f.`client_id`;
