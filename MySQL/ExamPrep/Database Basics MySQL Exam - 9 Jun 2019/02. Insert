@@ -1,0 +1,11 @@
+ INSERT INTO `cards`(`card_number`,`card_status`,`bank_account_id`) VALUES
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 191), 'Active', 191),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 192), 'Active', 192),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 193), 'Active', 193),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 194), 'Active', 194),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 195), 'Active', 195),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 196), 'Active', 196),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 197), 'Active', 197),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 198), 'Active', 198),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 199), 'Active', 199),
+ ((SELECT REVERSE (`full_name`) FROM `clients` WHERE `id` = 200), 'Active', 200);
