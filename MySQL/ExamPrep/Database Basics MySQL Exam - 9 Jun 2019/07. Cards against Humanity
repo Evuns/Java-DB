@@ -1,0 +1,6 @@
+SELECT c.`id`,CONCAT(`card_number`, ' : ', `full_name` ) AS `card_token`
+ FROM `cards` AS c JOIN `bank_accounts` AS b
+ ON `bank_account_id` = b.`id`
+ JOIN `clients` AS cl
+ ON cl.`id` = `client_id`
+ ORDER BY c.id DESC;
