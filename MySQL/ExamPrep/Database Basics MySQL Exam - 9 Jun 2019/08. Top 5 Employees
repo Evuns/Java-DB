@@ -1,0 +1,7 @@
+SELECT CONCAT(`first_name`, ' ', `last_name`) AS `full_name`,
+ `started_on`,COUNT(`client_id`) AS `count_of_clients` FROM `employees`
+ JOIN `employees_clients`
+ ON `id` = `employee_id`
+ GROUP BY `employee_id`
+ ORDER BY `count_of_clients` DESC,employee_id
+  LIMIT 5;
