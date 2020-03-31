@@ -1,0 +1,8 @@
+CREATE PROCEDURE udp_clientinfo (full_name VARCHAR(30))
+	BEGIN
+   SELECT `full_name`,`age`,`account_number`,CONCAT('$',`balance`)
+    AS `balance` FROM `clients` AS c
+    JOIN `bank_accounts`
+    ON c.id = `client_id`
+    WHERE c.full_name = full_name;
+    END;
