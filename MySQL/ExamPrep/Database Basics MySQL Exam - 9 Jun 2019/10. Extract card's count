@@ -1,0 +1,11 @@
+CREATE FUNCTION udf_client_cards_count(cl_full_name VARCHAR(30))
+ RETURNS INT
+	BEGIN
+	RETURN(	SELECT  COUNT(c.`id`) FROM `clients` AS cl
+        JOIN `bank_accounts` AS ba
+        ON cl.`id` = `client_id`
+        JOIN `cards` AS c
+        ON ba.`id` = `bank_account_id`
+        WHERE cl_full_name = `full_name`
+        GROUP BY `client_id`);
+	 END;
