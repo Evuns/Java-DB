@@ -1,0 +1,12 @@
+SELECT cr.`name`, COUNT(DISTINCT p.`id`) AS total_count_of_players, SUM(p.`salary`)
+AS total_sum_of_salaries FROM `countries` AS cr
+LEFT JOIN `towns` AS t
+ON cr.id = t.country_id
+LEFT JOIN `stadiums` AS st
+ON t.id = st.town_id
+LEFT JOIN `teams` AS te
+ON st.id = te.stadium_id
+LEFT JOIN `players` AS p
+ON te.id = p.team_id
+GROUP BY cr.id
+ORDER BY total_count_of_players DESC, cr.`name`;
