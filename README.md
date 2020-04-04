@@ -17,4 +17,6 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Subqueries%20and%20JOINs" target="_blank">6.Subqueries and Joins</a>
 
-7.Database Programmability
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Database%20Programmability/Exercise" target="_blank">7.Database Programmability</a>
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/ExamPrep" target="_blank">8.ExamPreparation</a>
+<a href="https://github.com/Evuns/Java-DB/tree/master/MySQL/Exam/Database%20Basics%20MySQL%20Exam%20-%209%20Feb%202020" target="_blank">9.Exam</a>
