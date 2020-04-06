@@ -1,0 +1,376 @@
+package introductionToDB;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+public class Main {
+    private static final String CONNECTION_STR = "jdbc:mysql://localhost:3306/";
+    private static final String DATABASE_NAME = "minions_db";
+
+    private static Connection connection;
+    private static String query;
+    private static PreparedStatement preparedStatement;
+    private static BufferedReader reader;
+
+    public static void main(String[] args) throws SQLException, IOException {
+        reader = new BufferedReader(new InputStreamReader(System.in));
+        Properties props = new Properties();
+
+        props.setProperty("user", "root");
+        props.setProperty("password", "36902580");
+
+        connection = DriverManager.getConnection(CONNECTION_STR + DATABASE_NAME, props);
+
+        //2.Get Villains’ Names
+        //printVillainsNameAndMinionsNumber();
+
+
+        //3.Get Minions Name
+        //printMinionName();
+
+        //4.Add Minion
+        //addMinionsTask();
+
+        //5.Change Town Names Casing
+        //changeNamesToUpperCase();
+
+        //6.*Remove Villain
+        //DROP and renew minions_db
+        //removeVillain();
+
+        //7.Print All Minion Names
+        //DROP and renew minions_db
+        //printMinionsNameInOrder();
+
+        //8.Increase Minions Age
+        //DROP and renew minions_db
+        //increaseMinionAge();
+
+        //9.Increase Age Stored Procedure
+        //DROP and renew minions_db
+                  /*Create DB procedure:
+
+                  DELIMITER %%
+                  CREATE PROCEDURE usp_get_older (id INT)
+                  BEGIN
+                  UPDATE minions AS m
+                  SET age = age + 1
+                  WHERE m.id = id;
+                  end %%
+                  DELIMITER ; */
+
+        increaseAgeStoredProcedure();
+    }
+
+    private static void removeVillain() throws IOException, SQLException {
+        System.out.println("Enter villain id:");
+        int id = Integer.parseInt(reader.readLine());
+
+        if (getNameById(id, "villains") == null) {
+            System.out.println("No such villain was found");
+            return;
+        }
+        String releaseMinions = String.format("DELETE FROM minions_villains WHERE villain_id = %d", id);
+        String deleteVillain = String.format("DELETE FROM villains where id = %d", id);
+        Statement statement = connection.createStatement();
+
+        printDeletedVillainNameAndMinionsNumber(id);
+
+        connection.setAutoCommit(false);
+        statement.executeUpdate(releaseMinions);
+        statement.executeUpdate(deleteVillain);
+        connection.commit();
+
+
+    }
+
+    private static void printDeletedVillainNameAndMinionsNumber(int id) throws SQLException {
+        query = "SELECT v.id, v.name, COUNT(mv.minion_id) AS 'count'\n" +
+                "FROM villains AS v\n" +
+                "JOIN minions_villains mv on v.id = mv.villain_id\n" +
+                "GROUP BY v.id\n" +
+                "HAVING v.`id` = ?\n";
+
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            System.out.printf("%s was deleted %n%d minions released", resultSet.getString("name"),
+                    resultSet.getInt(3));
+            return;
+        }
+    }
+
+    private static void increaseMinionAge() throws IOException, SQLException {
+        System.out.println("Enter ids:");
+        int[] ids = Arrays.stream(reader.readLine().split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        query = "UPDATE minions \n" +
+                "        SET age = age + 1, name = LOWER(name) \n" +
+                " WHERE id = ?";
+        preparedStatement = connection.prepareStatement(query,
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        int steps = ids.length;
+        for (int i = 0; i < steps; i++) {
+            preparedStatement.setInt(1, ids[i]);
+            preparedStatement.execute();
+        }
+        printMinionsNameAndAge();
+    }
+
+    private static void printMinionsNameAndAge() throws SQLException {
+        query = "SELECT name, age FROM minions";
+        preparedStatement = connection.prepareStatement(query);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            System.out.printf("%s %s%n", resultSet.getString("name"),
+                    resultSet.getInt(2));
+        }
+        return;
+    }
+
+    private static void increaseAgeStoredProcedure() throws IOException, SQLException {
+        System.out.println("Insert the id of the minion that should get older:");
+        int id = Integer.parseInt(reader.readLine());
+        int minionsCount = countOfEntities("minions");
+        while (id < 0 || id > minionsCount) {
+            System.out.println("Invalid id! Insert valid minion id:");
+            id = Integer.parseInt(reader.readLine());
+        }
+        String startProcedure = "CALL usp_get_older (?)";
+        query = "SELECT name, age FROM `minions` WHERE id = ?";
+        CallableStatement getOlderProcedure = connection.prepareCall(startProcedure);
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+        getOlderProcedure.setInt(1, id);
+        getOlderProcedure.execute();
+
+        preparedStatement.setInt(1, id);
+        ResultSet minions = preparedStatement.executeQuery();
+        minions.first();
+        System.out.println(minions.getString("name") +
+                " " + minions.getInt("age"));
+    }
+
+    private static int countOfEntities(String table) throws SQLException {
+        query = "SELECT id FROM " + table;
+        preparedStatement = connection.prepareStatement(query);
+        ResultSet entities = preparedStatement.executeQuery();
+        int entitiCount = 0;
+        while (entities.next()) {
+            entitiCount++;
+        }
+        return entitiCount;
+    }
+
+    private static void printMinionsNameInOrder() throws SQLException {
+        query = "SELECT name FROM `minions`";
+        preparedStatement = connection.prepareStatement(query);
+        ResultSet minions = preparedStatement.executeQuery();
+
+        int minionsCount = countOfEntities("minions");
+        int firstIndex = 1;
+        int lastIndex = minionsCount;
+
+        for (int i = 1; i < minionsCount + 1; i++) {
+            if (i % 2 != 0) {
+                minions.absolute(firstIndex);
+                firstIndex++;
+            } else {
+                minions.absolute(lastIndex);
+                lastIndex--;
+            }
+
+            System.out.println(minions.getString("name"));
+            minions.next();
+        }
+    }
+
+    private static void changeNamesToUpperCase() throws IOException, SQLException {
+        System.out.println("Enter country:");
+        String country = reader.readLine();
+        if (!checkIfCountryExist(country)) {
+            System.out.println("No town names were affected.");
+            return;
+        }
+        returnUpperCaseTowns(country);
+    }
+
+    private static void returnUpperCaseTowns(String country) throws SQLException {
+        query = "SELECT id, name FROM towns WHERE country = ?";
+        preparedStatement = connection.prepareStatement(query,
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        preparedStatement.setString(1, country);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        List<String> townsUppercase = new ArrayList<>();
+        while (resultSet.next()) {
+            String town = resultSet.getString("name");
+            townsUppercase.add(resultSet.getString("name"));
+            resultSet.updateString("name", town.toUpperCase());
+            resultSet.updateRow();
+        }
+
+        if (townsUppercase.size() > 1) {
+            System.out.println(townsUppercase.size() + " town names were affected.");
+        } else {
+            System.out.println("1 town name was affected.");
+        }
+        System.out.println(townsUppercase);
+    }
+
+    private static boolean checkIfCountryExist(String country) throws SQLException {
+        query = "SELECT * FROM towns WHERE country = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, country);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next();
+    }
+
+    private static void addMinionsTask() throws IOException, SQLException {
+        System.out.println("Enter minion data and villain name:");
+        String[] inputData = reader.readLine().split("\\s+");
+        String minionName = inputData[1];
+        int minionAge = Integer.parseInt(inputData[2]);
+        String town = inputData[3];
+
+        String[] villain = reader.readLine().split("\\s+");
+        String villainName = villain[1];
+
+        if (!checkIfExistByName(town, "towns")) {
+            insertTown(town);
+            System.out.printf("Town %s was added to the database.%n", town);
+        }
+
+        if (!checkIfExistByName(villainName, "villains")) {
+            insertVillain(villainName);
+            System.out.printf("Villain %s was added to the database.%n", villainName);
+        }
+
+        if (!checkIfExistByName(minionName, "minions")) {
+            int townId = getIdByName(town, "towns");
+            addMinion(minionName, minionAge, townId);
+            System.out.printf("Successfully added %s to be minion of %s.", minionName, villainName);
+            int minionId = getIdByName(minionName, "minions");
+            int villainId = getIdByName(villainName, "villains");
+            addMinionToVillain(minionId, villainId);
+        }
+    }
+
+    private static void addMinionToVillain(int minionId, int villainId) throws SQLException {
+        query = "INSERT INTO minions_villains VALUE(?,?)";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, minionId);
+        preparedStatement.setInt(2, villainId);
+        preparedStatement.execute();
+    }
+
+    private static void addMinion(String minionName, int minionAge, int townId) throws SQLException {
+        query = "INSERT INTO `minions` (`name`, `age`, `town_id`) VALUES (?, ?, ?)";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, minionName);
+        preparedStatement.setInt(2, minionAge);
+        preparedStatement.setInt(3, townId);
+        preparedStatement.executeUpdate();
+    }
+
+    private static Integer getIdByName(String name, String table) throws SQLException {
+        query = "SELECT `id` FROM " + table + " WHERE name = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, name);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next() ? resultSet.getInt("id") : null;
+    }
+
+    private static void insertVillain(String villainName) throws SQLException {
+        query = "INSERT INTO villains (name, evilness_factor) VALUE (?, ?)";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, villainName);
+        preparedStatement.setString(2, "evil");
+        preparedStatement.executeUpdate();
+    }
+
+    private static void insertTown(String town) throws SQLException {
+        query = "INSERT INTO towns (name) VALUE (?)";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, town);
+        preparedStatement.execute();
+    }
+
+    private static boolean checkIfExistByName(String name, String table) throws SQLException {
+        query = "SELECT * FROM " + table + " WHERE name = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, name);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next();
+
+    }
+
+    private static void printMinionName() throws IOException, SQLException {
+        System.out.println("Enter villain id:");
+        int villain_id = Integer.parseInt(reader.readLine());
+
+        if (!checkIfExistById(villain_id, "villains")) {
+            System.out.printf("No villain with ID %d exists in the database.", villain_id);
+        }
+        System.out.printf("Villain: %s%n", getNameById(villain_id, "villains"));
+
+        getMinionsNameAndAgeByVillainId(villain_id);
+    }
+
+    private static void getMinionsNameAndAgeByVillainId(int villain_id) throws SQLException {
+        query = "SELECT m.name,m.age FROM minions AS m \n" +
+                "JOIN minions_villains mv on m.id = mv.minion_id\n" +
+                "WHERE mv.villain_id = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, villain_id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        int minions = 0;
+
+        while (resultSet.next()) {
+            System.out.printf("%d. %s %d%n", ++minions, resultSet.getString("name"),
+                    resultSet.getInt(2));
+        }
+    }
+
+    private static String getNameById(int id, String table) throws SQLException {
+        query = "SELECT `name` FROM " + table + " WHERE id = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet.next() ? resultSet.getString("name") : null;
+    }
+
+    private static boolean checkIfExistById(int id, String table) throws SQLException {
+        query = "SELECT * FROM " + table + " WHERE id = ?";
+        preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, id);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        return resultSet.next();
+    }
+
+    private static void printVillainsNameAndMinionsNumber() throws SQLException {
+        query = "SELECT v.name, COUNT(mv.minion_id) AS 'count'\n" +
+                "FROM villains AS v\n" +
+                "JOIN minions_villains mv on v.id = mv.villain_id\n" +
+                "GROUP BY v.name\n" +
+                "HAVING `count` > 15\n" +
+                "ORDER BY `count` DESC";
+
+        preparedStatement = connection.prepareStatement(query);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            System.out.printf("%s %d%n", resultSet.getString("name"),
+                    resultSet.getInt(2));
+        }
+        return;
+    }
+
+}
+
