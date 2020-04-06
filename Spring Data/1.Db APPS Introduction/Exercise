@@ -23,7 +23,7 @@ public class Main {
         Properties props = new Properties();
 
         props.setProperty("user", "root");
-        props.setProperty("password", "36902580");
+        props.setProperty("password", "123456");
 
         connection = DriverManager.getConnection(CONNECTION_STR + DATABASE_NAME, props);
 
