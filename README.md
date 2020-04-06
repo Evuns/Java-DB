@@ -25,15 +25,27 @@ _Course topics:_
 
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data" target="_blank"> II. Spring Data</a>
+
 _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/1.Db%20APPS%20Introduction" target="_blank">1.DB APPS introduction</a>
+
 2.ORM Fundamentals
+
 4.Introduction to hibernate
+
 5.Hibernate code first
+
 6.Spring Data intro
+
 7.Spring data advanced quering
-8.Spring data auto mapping obj
+
+8.Spring data auto mapping objects
+
 9.JSON processing
+
 10.XML processing
-11.Exam prep
+
+11.Exam preparation
+
+12.Exam
