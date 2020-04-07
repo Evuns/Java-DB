@@ -1,0 +1,267 @@
+import entities.*;
+
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
+
+public class Engine implements Runnable {
+    private final EntityManager entityManager;
+    private final BufferedReader reader;
+    private final String EMPLOYEES = "SELECT e FROM Employee AS e ";
+    private final double INCREASE_SALARY = 1.12;
+
+    public Engine(EntityManager entityManager) {
+        this.entityManager = entityManager;
+        this.reader = new BufferedReader(new InputStreamReader(System.in));
+    }
+
+    @Override
+    public void run() {
+        /*exercise2*/
+        this.removeObject();
+
+        /*exercise3*/
+//        try {
+//            this.findIfContainsEmployee();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        /*exercise4*/
+        //this.employeeWithSalaryOver50000();
+
+        /*exercise5*/
+        //this.employeesFromDepartments();
+
+        /*exercise6*/
+//        try {
+//            this.addNewAddressAndUpdateEmployee();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        /*exercise7
+         * reset dataBase*/
+        //       this.findAddressesAndOccupancy();
+        /*exercise8*/
+//        try {
+//            this.getEmployeeWithProject();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        /*exercise9*/
+        // this.findLatestTenProjects();
+
+        /*exercise10*/
+        //this.increaseSalaries();
+
+        /*exercise11*/
+//        try {
+//            this.removeTowns();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        /*exercise12*/
+//        try {
+//            this.findEmployeesByFirstName();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        /*exercise13
+         * exercise 10 must be run once in order to get the correct results*/
+        //this.maxSalaryForDepartment();
+
+    }
+
+    private void maxSalaryForDepartment() {
+        List<Object[]> employees = this.entityManager
+                .createQuery("SELECT e.department.name, max(e.salary)  FROM Employee AS e " +
+                        "GROUP BY e.department.id " +
+                        "HAVING max(e.salary) NOT BETWEEN 30000 AND 70000 " +
+                        "ORDER BY e.department.id", Object[].class)
+                .getResultList();
+
+        employees.forEach(e ->
+                System.out.printf("%s %.2f%n", e[0], e[1]));
+    }
+
+    private void findEmployeesByFirstName() throws IOException {
+        System.out.println("Enter begin chars of first name:");
+        String startsWith = reader.readLine();
+
+        List<Employee> employees = this.entityManager.createQuery("SELECT e FROM Employee AS e " +
+                "WHERE e.firstName LIKE :start", Employee.class).
+                setParameter("start", startsWith + "%").getResultList();
+        for (Employee employee : employees) {
+            System.out.printf("%s %s - %s - ($%.2f)%n", employee.getFirstName(),
+                    employee.getLastName(), employee.getJobTitle(), employee.getSalary());
+        }
+
+    }
+
+    private void removeTowns() throws IOException {
+        System.out.println("Enter town name:");
+        String townName = reader.readLine();
+        List<Address> townAddresses = this.entityManager.createQuery("SELECT a FROM Address AS a " +
+                "WHERE a.town.name =: townName ", Address.class).
+                setParameter("townName", townName).getResultList();
+
+        try {
+            this.entityManager.getTransaction().begin();
+            for (Address townAddress : townAddresses) {
+                this.entityManager.createQuery("SELECT e FROM Employee AS e " +
+                        "WHERE e.address =: address ", Employee.class).setParameter("address", townAddress).
+                        getResultStream().forEach(e -> e.setAddress(null));
+                this.entityManager.remove(townAddress);
+            }
+
+            Town town = this.entityManager.createQuery("SELECT t FROM Town AS t " +
+                    "WHERE t.name =: townName", Town.class).
+                    setParameter("townName", townName).getSingleResult();
+
+            this.entityManager.remove(town);
+            this.entityManager.getTransaction().commit();
+            System.out.printf("%d address%s in %s deleted",
+                    townAddresses.size(), (townAddresses.size() != 1) ? "es" : "", townName);
+        } catch (NoResultException ex) {
+            System.out.printf("There are no addresses in town %s.", townName);
+        }
+    }
+
+    private void increaseSalaries() {
+        List<Employee> employees = this.entityManager.createQuery(EMPLOYEES +
+                "WHERE e.department.name IN ('Engineering'," +
+                "'Tool Design', 'Marketing', 'Information Services')").getResultList();
+
+        this.entityManager.getTransaction().begin();
+        for (Employee employee : employees) {
+            BigDecimal currentSalary = employee.getSalary();
+            employee.setSalary(currentSalary.multiply(BigDecimal.valueOf(INCREASE_SALARY)));
+            System.out.printf("%s %s ($%.2f)%n", employee.getFirstName(), employee.getLastName(),
+                    employee.getSalary());
+
+        }
+        this.entityManager.getTransaction().commit();
+    }
+
+    private void findLatestTenProjects() {
+        List<Project> projects = entityManager.createQuery("SELECT p FROM Project AS p " +
+                "ORDER BY p.startDate DESC").setMaxResults(10).getResultList();
+
+        projects.stream().sorted(Comparator.comparing(Project::getName)).forEach(p -> System.out.printf(
+                "Project name: %s%n" +
+                        "\t Project Description: %s%n" +
+                        "\t Project Start Date:%s%n" +
+                        "\t Project End Date: %s%n", p.getName(), p.getDescription(),
+                p.getStartDate(), p.getEndDate()));
+    }
+
+    private void getEmployeeWithProject() throws IOException {
+        System.out.println("Enter employee id: ");
+        int id = Integer.parseInt(reader.readLine());
+        Employee employee = this.entityManager.createQuery(EMPLOYEES +
+                "WHERE e.id =: id", Employee.class).setParameter("id", id).getSingleResult();
+        System.out.printf("%s %s - %s%n", employee.getFirstName(),
+                employee.getLastName(), employee.getJobTitle());
+
+        employee.getProjects().stream().sorted(Comparator.comparing(Project::getName)).
+                forEach(p -> System.out.println("\t  " + p.getName()));
+    }
+
+    private void findAddressesAndOccupancy() {
+        List<Address> addresses = this.entityManager.createQuery("SELECT a FROM  Address AS a " +
+                "ORDER BY a.employees.size DESC ", Address.class).setMaxResults(10)
+                .getResultList();
+
+        for (Address address : addresses) {
+            System.out.println(address.getText() + ", " +
+                    address.getTown().getName() + " - " +
+                    address.getEmployees().size() + " employees");
+        }
+    }
+
+    private void addNewAddressAndUpdateEmployee() throws IOException {
+        final String ADDRESS = "Vitoshka 15";
+        System.out.println("Enter last name:");
+        String lastNameInput = reader.readLine();
+        try {
+            Employee employee = this.entityManager.createQuery(EMPLOYEES +
+                    "WHERE e.lastName =: name", Employee.class).setParameter("name", lastNameInput).
+                    getSingleResult();
+            Town town = this.entityManager.createQuery("SELECT t FROM Town  AS t " +
+                    "WHERE t.name =: town", Town.class).setParameter("town", "sofia").
+                    getSingleResult();
+
+            Address address = new Address();
+            address.setText("Vitoshka 15");
+            address.setTown(town);
+
+            this.entityManager.getTransaction().begin();
+            this.entityManager.persist(address);
+            employee.setAddress(address);
+            this.entityManager.getTransaction().commit();
+            System.out.println(lastNameInput + "`s address was changed to Vitoshka 15.");
+        } catch (NoResultException ex) {
+            System.out.println("There is no employee with that last name.");
+        }
+    }
+
+    private void employeesFromDepartments() {
+        List<Employee> employees = this.entityManager.createQuery(EMPLOYEES +
+                "WHERE e.department.name ='Research and Development' " +
+                "ORDER BY e.salary,e.id").getResultList();
+        for (Employee employee : employees) {
+            System.out.println(employee.getFirstName() + " " + employee.getLastName() + " from " +
+                    employee.getDepartment().getName() + " - $" + employee.getSalary());
+        }
+    }
+
+    private void employeeWithSalaryOver50000() {
+        List<Employee> employees = this.entityManager.createQuery(EMPLOYEES +
+                "WHERE e.salary > 50000", Employee.class).getResultList();
+        employees.forEach(employee -> System.out.println(employee.getFirstName()));
+    }
+
+    private void findIfContainsEmployee() throws IOException {
+        System.out.println("Enter employee full name:");
+        String fullName = this.reader.readLine();
+
+        try {
+            Employee employee = this.entityManager.createQuery(EMPLOYEES +
+                    "WHERE concat (e.firstName, ' ', e.lastName) = :name", Employee.class)
+                    .setParameter("name", fullName)
+                    .getSingleResult();
+            System.out.println("Yes");
+        } catch (NoResultException ex) {
+            System.out.println("No");
+        }
+    }
+
+    private void removeObject() {
+        List<Town> towns = this.entityManager.createQuery("SELECT t FROM Town AS t ",
+                Town.class).getResultList();
+
+        this.entityManager.getTransaction().begin();
+
+        towns.stream().filter(town -> town.getName().length() > 5)
+                .forEach(this.entityManager::detach);
+
+        towns.stream().filter(entityManager::contains).forEach(town -> {
+            town.setName(town.getName().toLowerCase());
+            this.entityManager.merge(town);
+            this.entityManager.flush();
+        });
+
+        this.entityManager.getTransaction().commit();
+
+
+    }
+}
