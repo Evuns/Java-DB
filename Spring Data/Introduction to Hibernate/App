@@ -1,0 +1,15 @@
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+public class App {
+    public static void main(String[] args) {
+        EntityManagerFactory eMFactory =
+                Persistence.createEntityManagerFactory("soft_uni");
+
+        EntityManager eManager = eMFactory.createEntityManager();
+
+        Engine engine = new Engine(eManager);
+        engine.run();
+    }
+}
