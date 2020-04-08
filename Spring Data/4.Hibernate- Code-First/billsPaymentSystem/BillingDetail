@@ -1,0 +1,47 @@
+package entities.billsPaymentSystem;
+
+import entities.BaseEntity;
+
+import javax.persistence.*;
+
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public abstract class BillingDetail {
+    private Long id;
+    private int number;
+    private User owner;
+
+    public BillingDetail() {
+    }
+
+    @Id
+    @Column(unique = true)
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Column(length = 20, nullable = false, unique = true)
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+
+}
