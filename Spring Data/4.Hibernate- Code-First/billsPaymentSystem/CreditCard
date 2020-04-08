@@ -1,0 +1,47 @@
+package entities.billsPaymentSystem;
+
+import entities.BaseEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.time.Month;
+import java.time.Year;
+
+@Entity
+@Table
+public class CreditCard extends BillingDetail {
+    private String cardType;
+    private Month expirationMonth;
+    private Year expirationYear;
+
+    public CreditCard() {
+    }
+
+    @Column(name = "type", length = 20, nullable = false)
+    public String getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(String cardType) {
+        this.cardType = cardType;
+    }
+
+    @Column(name = "expiration_month", nullable = false)
+    public Month getExpirationMonth() {
+        return expirationMonth;
+    }
+
+    public void setExpirationMonth(Month expirationMonth) {
+        this.expirationMonth = expirationMonth;
+    }
+
+    @Column(name = "expiration_year", nullable = false)
+    public Year getExpirationYear() {
+        return expirationYear;
+    }
+
+    public void setExpirationYear(Year expirationYear) {
+        this.expirationYear = expirationYear;
+    }
+}
