@@ -1,0 +1,23 @@
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+public class App {
+    static final String GRINGOTTS_PU = "gringotts";
+    static final String SALES_PU = "sales";
+    static final String UNIVERSITY_PU = "university_system";
+    static final String HOSPITAL_PU = "hospital_db";
+    static final String BILLS_PAYMENT_PU = "bills_db";
+
+    public static void main(String[] args) {
+
+        EntityManagerFactory entityManagerFactory = Persistence.
+                createEntityManagerFactory(BILLS_PAYMENT_PU);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Engine engine = new Engine(entityManager);
+
+        engine.run();
+
+
+    }
+}
