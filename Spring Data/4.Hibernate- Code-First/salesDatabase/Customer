@@ -1,0 +1,54 @@
+package entities.salesDatabase;
+
+import entities.BaseEntity;
+
+import javax.persistence.*;
+import java.util.Set;
+
+@Entity
+@Table(name = "customers")
+public class Customer extends BaseEntity {
+    private String name;
+    private String email;
+    private String creditCartNumber;
+    private Set<Sale> sales;
+
+    public Customer() {
+    }
+
+    @Column
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Column
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Column(name = "credit_cart_number")
+    public String getCreditCartNumber() {
+        return creditCartNumber;
+    }
+
+    public void setCreditCartNumber(String creditCartNumber) {
+        this.creditCartNumber = creditCartNumber;
+    }
+
+    @OneToMany(mappedBy = "customer", targetEntity = Sale.class, fetch = FetchType.LAZY)
+    public Set<Sale> getSales() {
+        return sales;
+    }
+
+    public void setSales(Set<Sale> sales) {
+        this.sales = sales;
+    }
+}
