@@ -1,0 +1,127 @@
+package com.softuni.springintro.controllers;
+
+import com.softuni.springintro.services.AuthorService;
+import com.softuni.springintro.services.BookService;
+import com.softuni.springintro.services.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Controller;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+@Controller
+public class AppController implements CommandLineRunner {
+    private final CategoryService categoryService;
+    private final AuthorService authorService;
+    private final BookService bookService;
+    private final Scanner scanner = new Scanner(System.in);
+
+    @Autowired
+    public AppController(CategoryService categoryService, AuthorService authorService, BookService bookService) {
+        this.categoryService = categoryService;
+        this.authorService = authorService;
+        this.bookService = bookService;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        // SEED DATA BEFORE BEGIN!
+        this.categoryService.seedCategories();
+        this.authorService.seedAuthors();
+        this.bookService.seedBooks();
+
+
+        //  1.Books Titles by Age Restriction
+        booksTitlesByAgeRestriction();
+
+        //  2.Golden Books
+        this.bookService.getAllGoldenTitlesWithCopiesLessThan5000(5000)
+                .forEach(System.out::println);
+
+        //  3.Books by Price
+        this.bookService.getAllTitlesAndPricesLessAndHigherThan(5, 40).forEach(book ->
+                System.out.printf("%s - $%.2f%n", book.getTitle(), book.getPrice()));
+
+        //   4.Not Released Books
+        booksTitleNotInTheYear();
+
+        //   5.Books Released Before Date
+        booksInfoReleasedBefore();
+
+        //    6.Authors Search
+        findAuthorsWhoEndsWith();
+
+        //   7.Books Search
+        booksWithTitlesContaining();
+
+        // 8.Book Titles Search
+        booksWithAuthorStartingWith();
+
+        // 9.Count Books
+        countBooksWithTitleLongerThan();
+
+        //10.Total Book Copies
+        this.authorService.getAuthorsByBookCopiesCount().forEach(System.out::println);
+
+        //11.Reduced Book
+        getBookDetails();
+    }
+
+    private void getBookDetails() {
+        System.out.println("Please enter book title:");
+        String title = scanner.nextLine();
+        System.out.println(this.bookService.getBookDetailsByTitle(title));
+
+    }
+
+
+    private void countBooksWithTitleLongerThan() {
+        System.out.println("Please enter length:");
+        int length = Integer.parseInt(scanner.nextLine());
+        System.out.printf("There are %d books with longer title than %d symbols%n", this.bookService.numberBooks(length), length);
+    }
+
+    private void booksWithAuthorStartingWith() {
+        System.out.println("Please enter beginning of author`s last name:");
+        String pattern = scanner.nextLine();
+        this.bookService.getAllTitlesWithAuthorsStartingWith(pattern).forEach(System.out::println);
+    }
+
+    private void booksWithTitlesContaining() {
+        System.out.println("Please enter pattern:");
+        String pattern = scanner.nextLine();
+        this.bookService.getAllWithTitlesContaining(pattern).forEach(System.out::println);
+    }
+
+    private void findAuthorsWhoEndsWith() {
+        System.out.println("Please enter end of the author`s First name:");
+        String end = scanner.nextLine();
+        this.authorService.findFullNamesByEndOfFirstName(end).forEach(System.out::println);
+    }
+
+    private void booksInfoReleasedBefore() {
+        System.out.println("Please enter released date:");
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate date = LocalDate.parse(scanner.nextLine(), format);
+        this.bookService.getAllWithReleasedDateBefore(date).forEach(System.out::println);
+    }
+
+    private void booksTitleNotInTheYear() {
+        System.out.println("Please enter year:");
+        int year = Integer.parseInt(scanner.nextLine());
+        this.bookService.getAllWithReleasedYearNotIn(year).forEach(System.out::println);
+    }
+
+
+    private void booksTitlesByAgeRestriction() {
+        System.out.println("Please insert age restriction:");
+        String restriction = scanner.nextLine().toUpperCase();
+        this.bookService.getAllByAgeRestrictionEquals(restriction).forEach(System.out::println);
+    }
+}
+
+
