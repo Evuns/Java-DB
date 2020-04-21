@@ -1,0 +1,18 @@
+package com.softuni.springintro.services;
+
+import com.softuni.springintro.entities.Author;
+
+import java.util.Date;
+import java.util.List;
+
+public interface AuthorService {
+    Author findAuthorById(Long id);
+
+    int getAllAuthorsCount();
+
+    void seedAuthors();
+
+    List<String> findFullNamesByEndOfFirstName(String ends);
+
+    List<String> getAuthorsByBookCopiesCount();
+}
