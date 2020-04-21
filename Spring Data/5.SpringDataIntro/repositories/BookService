@@ -1,0 +1,34 @@
+package com.softuni.springintro.services;
+
+import com.softuni.springintro.entities.AgeRestriction;
+import com.softuni.springintro.entities.Author;
+import com.softuni.springintro.entities.Book;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+
+public interface BookService {
+    void seedBooks() throws IOException;
+
+    Author getRandomAuthor();
+
+    List<String> getAllByAgeRestrictionEquals(String ageRestriction);
+
+    List<String> getAllGoldenTitlesWithCopiesLessThan5000(int copies);
+
+    List<Book> getAllTitlesAndPricesLessAndHigherThan(double lower, double higher);
+
+    List<String> getAllWithReleasedYearNotIn(int year);
+
+    List<String> getAllWithReleasedDateBefore(LocalDate date);
+
+    List<String> getAllWithTitlesContaining(String format);
+
+    List<String> getAllTitlesWithAuthorsStartingWith(String pattern);
+
+    int numberBooks(int length);
+
+    String getBookDetailsByTitle(String title);
+
+}
