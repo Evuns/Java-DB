@@ -1,0 +1,83 @@
+package com.softuni.springintro.services.impl;
+
+import com.softuni.springintro.entities.Author;
+import com.softuni.springintro.repositories.AuthorRepository;
+import com.softuni.springintro.services.AuthorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import static com.softuni.springintro.constants.Constants.AUTHORS_FILE_PATH;
+
+@Service
+@Transactional
+public class AuthorServiceImpl implements AuthorService {
+
+    final private AuthorRepository authorRepository;
+
+    @Autowired
+    public AuthorServiceImpl(final AuthorRepository authorRepository) {
+        this.authorRepository = authorRepository;
+    }
+
+
+    @Override
+    public Author findAuthorById(Long id) {
+        return this.authorRepository.getOne(id);
+    }
+
+    @Override
+    public int getAllAuthorsCount() {
+        long count = this.authorRepository.count();
+        if (count < 1L) {
+            throw new RuntimeException("No authors in database");
+        }
+
+        List<Author> authors = this.authorRepository.findAll();
+        return authors.size();
+    }
+
+    @Override
+    public void seedAuthors() {
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(
+                new FileInputStream(AUTHORS_FILE_PATH)))) {
+            br.lines()
+                    .map(line -> line.split("\\s+"))
+                    .forEach(names -> {
+                        Author author = new Author();
+                        author.setFirstName(names[0]);
+                        author.setLastName(names[1]);
+                        this.authorRepository.saveAndFlush(author);
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<String> findFullNamesByEndOfFirstName(String ends) {
+        return this.authorRepository.findAllByFirstNameEndingWith(ends).stream().map(author ->
+                String.format("%s %s", author.getFirstName(), author.getLastName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAuthorsByBookCopiesCount() {
+        return this.authorRepository
+                .findAuthorsByBooksCopies()
+                .stream()
+                .map(obj -> (String) obj)
+                .collect(Collectors.toList());
+    }
+}
+
+
