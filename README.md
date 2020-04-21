@@ -32,11 +32,11 @@ _Course topics:_
 
 2.ORM Fundamentals
 
-4.Introduction to hibernate
+<a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/Introduction%20to%20Hibernate" target="_blank">4.Introduction to hibernate
 
-5.Hibernate code first
+<a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/4.Hibernate-%20Code-First" target="_blank">5.Hibernate code first
 
-6.Spring Data intro
+<a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/5.SpringDataIntro" target="_blank">6.Spring Data intro
 
 7.Spring data advanced quering
 
