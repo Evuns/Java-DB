@@ -38,7 +38,7 @@ _Course topics:_
 
 <a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/5.SpringDataIntro" target="_blank">6.Spring Data intro</a>
 
-7.Spring data advanced quering
+<a href="https://github.com/Evuns/Java-DB/tree/master/Spring%20Data/5.SpringDataIntro" target="_blank">7.Spring data advanced quering</a>
 
 8.Spring data auto mapping objects
 
