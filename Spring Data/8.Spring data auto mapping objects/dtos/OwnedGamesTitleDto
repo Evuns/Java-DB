@@ -1,0 +1,16 @@
+package com.example.automapping.dtos;
+
+public class OwnedGamesTitleDto {
+    private String title;
+
+    public OwnedGamesTitleDto() {
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+}
