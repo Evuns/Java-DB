@@ -1,0 +1,39 @@
+package com.example.automapping.entities;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+@Entity
+@Table(name = "orders")
+public class Order extends BaseEntity {
+
+    private Set<Game> games;
+    private User user;
+
+    @ManyToOne
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Order() {
+        this.games = new HashSet<>();
+    }
+
+    @ManyToMany
+    @JoinTable(name = "orders_games", joinColumns = @JoinColumn(name = "game_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "order_id", referencedColumnName = "id"))
+    public Set<Game> getGames() {
+        return games;
+    }
+
+    public void setGames(Set<Game> games) {
+        this.games = games;
+    }
+}
