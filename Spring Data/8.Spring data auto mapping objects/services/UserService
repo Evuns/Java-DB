@@ -1,0 +1,29 @@
+package com.example.automapping.services;
+
+import com.example.automapping.dtos.LoginDto;
+import com.example.automapping.dtos.OwnedGamesTitleDto;
+import com.example.automapping.dtos.RegisterDto;
+import org.springframework.stereotype.Service;
+
+import java.util.Set;
+
+
+public interface UserService {
+
+    void register(RegisterDto userRegister);
+
+    void login(LoginDto loginUser);
+
+    void logout();
+
+    boolean LoggedUserIsAdmin();
+
+    boolean isUserAlreadyRegister(String email);
+
+    boolean LoggedUser();
+
+    void getUserGames();
+
+    Set<OwnedGamesTitleDto> getOwnedGamesTitle(String email);
+
+}
