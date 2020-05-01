@@ -1,0 +1,21 @@
+package com.example.automapping.services;
+
+import com.example.automapping.dtos.GameAddDto;
+import com.example.automapping.entities.Game;
+import org.springframework.stereotype.Service;
+
+
+public interface GameService {
+
+    void addGame(GameAddDto gameAddDto);
+
+    Game findById(int id);
+
+    void deleteGame(int id);
+
+    void editGame(String... args);
+
+    void printAllGames();
+
+    void printDetailedGame(String title);
+}
