@@ -1,0 +1,10 @@
+package com.example.automapping.services.impl;
+
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+
+@Service
+@Transactional
+public class OrderServiceImpl {
+}
