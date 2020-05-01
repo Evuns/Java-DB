@@ -1,0 +1,123 @@
+package com.example.automapping.services.impl;
+
+import com.example.automapping.dtos.DetailGameDto;
+import com.example.automapping.dtos.EditGameDto;
+import com.example.automapping.dtos.GameAddDto;
+import com.example.automapping.dtos.ViewGameDto;
+import com.example.automapping.entities.Game;
+import com.example.automapping.repositories.GameRepository;
+import com.example.automapping.services.GameService;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+@Service
+@Transactional
+public class GameServiceImpl implements GameService {
+    private final GameRepository gameRepository;
+    private final ModelMapper modelMapper;
+    private final UserServiceImpl userService;
+
+    public GameServiceImpl(GameRepository gameRepository, ModelMapper modelMapper, UserServiceImpl userService) {
+        this.gameRepository = gameRepository;
+        this.modelMapper = modelMapper;
+        this.userService = userService;
+    }
+
+    @Override
+    public void addGame(GameAddDto gameAddDto) {
+        if (this.userService.LoggedUserIsAdmin()) {
+            Game game = this.modelMapper.map(gameAddDto, Game.class);
+            this.gameRepository.saveAndFlush(game);
+            System.out.printf("Added %s%n", gameAddDto.getTitle());
+        } else {
+            System.out.println("Logged user is not admin.");
+        }
+    }
+
+    @Override
+    public Game findById(int id) {
+        return this.gameRepository.findById(id);
+    }
+
+
+    @Override
+    public void deleteGame(int id) {
+        if (this.userService.LoggedUserIsAdmin()) {
+            if (findById(id) == null) {
+                System.out.println("Invalid game id.");
+            } else {
+                System.out.printf("Deleted %s.%n", this.gameRepository.findById(id).getTitle());
+                this.gameRepository.deleteById(id);
+            }
+        } else {
+            System.out.println("Logged user is not admin.");
+        }
+    }
+
+    @Override
+    public void editGame(String... args) {
+        if (this.userService.LoggedUserIsAdmin()) {
+            if (findById(Integer.parseInt(args[1])) == null) {
+                System.out.println("Invalid game id.");
+            } else {
+                EditGameDto editGameDto = this.modelMapper.map
+                        (findById(Integer.parseInt(args[1])), EditGameDto.class);
+                for (int i = 2; i < args.length; i++) {
+                    String[] data = args[i].split("=");
+                    switch (data[0]) {
+                        case "price":
+                            editGameDto.setPrice(Double.parseDouble(data[1]));
+                            break;
+                        case "size":
+                            editGameDto.setSize(Double.parseDouble(data[1]));
+                            break;
+                        case "title":
+                            editGameDto.setTitle(data[1]);
+                            break;
+                        case "trailer":
+                            editGameDto.setTrailer(data[1]);
+                            break;
+                        case "image":
+                            editGameDto.setImage(data[1]);
+                            break;
+                        case "description":
+                            editGameDto.setDescription(data[1]);
+                            break;
+                        case "releaseDate":
+                            editGameDto.setReleaseDate(LocalDate.parse(data[1],
+                                    DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    }
+                }
+                Game game = this.modelMapper.map(editGameDto, Game.class);
+                game.setId(Integer.parseInt(args[1]));
+                this.gameRepository.saveAndFlush(game);
+                System.out.printf("Edited %s%n", game.getTitle());
+            }
+        } else {
+            System.out.println("Logged user is not admin.");
+        }
+    }
+
+    @Override
+    public void printAllGames() {
+        this.gameRepository.findAll().forEach(game -> {
+            ViewGameDto view = modelMapper.map(game, ViewGameDto.class);
+            System.out.println(view.toString());
+        });
+    }
+
+    @Override
+    public void printDetailedGame(String title) {
+        Game game = this.gameRepository.findByTitle(title);
+        if (game != null) {
+            DetailGameDto detailed = this.modelMapper.map(game, DetailGameDto.class);
+            System.out.println(detailed.toString());
+        } else {
+            System.out.println("There is no game wit such name.");
+        }
+    }
+}
