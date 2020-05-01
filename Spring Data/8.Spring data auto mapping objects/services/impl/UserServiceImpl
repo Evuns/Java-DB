@@ -1,0 +1,114 @@
+package com.example.automapping.services.impl;
+
+import com.example.automapping.dtos.LoginDto;
+import com.example.automapping.dtos.OwnedGamesTitleDto;
+import com.example.automapping.dtos.RegisterDto;
+import com.example.automapping.dtos.UserDto;
+import com.example.automapping.entities.Role;
+import com.example.automapping.repositories.UserRepository;
+import com.example.automapping.entities.User;
+import com.example.automapping.services.UserService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
+    private UserDto userDto;
+
+    @Autowired
+    public UserServiceImpl(final UserRepository userRepository, final ModelMapper modelMapper) {
+        this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+    }
+
+
+    @Override
+    public void register(RegisterDto userRegister) {
+        User user = this.modelMapper.map(userRegister, User.class);
+        user.setRole(this.userRepository.count() == 0 ? Role.ADMINISTRATOR : Role.USER);
+        if (isUserAlreadyRegister(userRegister.getEmail())) {
+            System.out.println("User whit that email already registered.");
+        } else {
+            this.userRepository.saveAndFlush(user);
+            System.out.printf("%s was successfully registered!%n", user.getFullName());
+        }
+    }
+
+    @Override
+    public void login(LoginDto loginUser) {
+        User user = this.userRepository.getUserByEmailAndPassword
+                (loginUser.getEmail(), loginUser.getPassword());
+        if (user == null) {
+            System.out.println("Incorrect username / password");
+        } else {
+            this.userDto = this.modelMapper.map(user, UserDto.class);
+            System.out.printf("Successfully logged in %s%n", user.getFullName());
+        }
+    }
+
+    @Override
+    public void logout() {
+        if (this.userDto == null) {
+            System.out.println("Cannot logout. No user was logged in.");
+        } else {
+            String name = this.userDto.getFullName();
+            this.userDto = null;
+            System.out.printf("User %s successfully logged out!%n", name);
+        }
+    }
+
+    @Override
+    public boolean LoggedUserIsAdmin() {
+        if (this.userDto == null) {
+            return false;
+        }
+        return this.userDto.getRole().equals(Role.ADMINISTRATOR);
+    }
+
+    @Override
+    public boolean isUserAlreadyRegister(String email) {
+        User user = this.userRepository.getUserByEmail(email);
+        return user != null;
+    }
+
+    @Override
+    public boolean LoggedUser() {
+        if (this.userDto == null) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void getUserGames() {
+        if (!LoggedUser()) {
+            System.out.println("There is no logged user");
+        } else {
+            if (getOwnedGamesTitle(this.userDto.getEmail()).size() == 0) {
+                System.out.println("This user has no games.");
+            } else {
+                getOwnedGamesTitle(this.userDto.getEmail()).forEach(g -> System.out.println(g.getTitle()));
+            }
+        }
+    }
+
+    @Override
+    public Set<OwnedGamesTitleDto> getOwnedGamesTitle(String email) {
+        User user = this.userRepository.getUserByEmail(email);
+        return user.getGames().stream().map(game -> this.modelMapper.map(game, OwnedGamesTitleDto.class))
+                .collect(Collectors.toSet());
+
+    }
+
+}
+
+
