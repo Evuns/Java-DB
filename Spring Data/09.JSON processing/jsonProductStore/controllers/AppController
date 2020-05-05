@@ -1,0 +1,101 @@
+package com.softuni.jsonProductStore.controllers;
+
+import com.google.gson.Gson;
+import com.softuni.jsonProductStore.constants.GlobalConstants;
+import com.softuni.jsonProductStore.models.dtos.*;
+import com.softuni.jsonProductStore.services.CategoryService;
+import com.softuni.jsonProductStore.services.ProductService;
+import com.softuni.jsonProductStore.services.UserService;
+import com.softuni.jsonProductStore.utils.FileUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+
+@Component
+public class AppController implements CommandLineRunner {
+
+    private final Gson gson;
+    private final CategoryService categoryService;
+    private final UserService userService;
+    private final ProductService productService;
+    private final FileUtil fileUtil;
+
+    @Autowired
+    public AppController(Gson gson, CategoryService categoryService,
+                         UserService userService, ProductService productService,
+                         FileUtil fileUtil) {
+        this.gson = gson;
+        this.categoryService = categoryService;
+        this.userService = userService;
+        this.productService = productService;
+        this.fileUtil = fileUtil;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        seedCategories();
+        seedUsers();
+        seedProduct();
+
+        writeProductInRange();
+        writeSellerAndBuyer();
+        writeCategoriesByProduct();
+        writeUsersAndSales();
+
+    }
+
+    private void writeUsersAndSales() throws IOException {
+        UsersAndProductsViewDto usersAndProductsViewDtos = this.userService.usersAndProducts();
+        String json = this.gson.toJson(usersAndProductsViewDtos);
+        this.fileUtil.write(json, GlobalConstants.QUERY_FOURTH);
+    }
+
+    private void writeCategoriesByProduct() throws IOException {
+        List<CategoryProductsDto> categoryProductsDtos = this.categoryService.categoryByProducts();
+        String json = this.gson.toJson(categoryProductsDtos);
+        this.fileUtil.write(json, GlobalConstants.QUERY_THREE);
+    }
+
+    private void writeSellerAndBuyer() throws IOException {
+        List<SellerAndProductDto> sellerAndProductDtos = this.userService.sellerProductAndBuyer();
+
+        String json = this.gson.toJson(sellerAndProductDtos);
+        this.fileUtil.write(json, GlobalConstants.QUERY_TWO);
+    }
+
+    private void writeProductInRange() throws IOException {
+        List<ProductAndSellerDto> productDto = this.productService.getAllProductInRange();
+
+        String json = this.gson.toJson(productDto);
+        this.fileUtil.write(json, GlobalConstants.QUERY_ONE);
+    }
+
+    private void seedProduct() throws FileNotFoundException {
+        ProductSeedDto[] products = this.gson.fromJson(new FileReader(GlobalConstants.PRODUCTS_PATH),
+                ProductSeedDto[].class);
+        this.productService.seedProducts(products);
+    }
+
+    private void seedUsers() throws FileNotFoundException {
+        UserSeedDto[] users = this.gson.fromJson(new FileReader(GlobalConstants.USERS_PATH),
+                UserSeedDto[].class);
+        this.userService.seedUsersDto(users);
+
+    }
+
+    private void seedCategories() throws FileNotFoundException {
+        CategorySeedDto[] dtos = this.gson.fromJson(new FileReader(GlobalConstants.CATEGORIES_PATH),
+                CategorySeedDto[].class);
+        this.categoryService.seedCategories(dtos);
+
+
+    }
+
+
+}
