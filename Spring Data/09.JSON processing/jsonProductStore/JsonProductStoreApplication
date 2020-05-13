@@ -1,0 +1,13 @@
+package com.softuni.jsonProductStore;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class JsonProductStoreApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(JsonProductStoreApplication.class, args);
+    }
+
+}
