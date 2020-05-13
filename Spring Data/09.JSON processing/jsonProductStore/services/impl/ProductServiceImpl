@@ -1,0 +1,87 @@
+package com.softuni.jsonProductStore.services.impl;
+
+import com.softuni.jsonProductStore.models.dtos.ProductAndSellerDto;
+import com.softuni.jsonProductStore.models.dtos.ProductSeedDto;
+import com.softuni.jsonProductStore.models.entities.Category;
+import com.softuni.jsonProductStore.models.entities.Product;
+import com.softuni.jsonProductStore.models.entities.User;
+import com.softuni.jsonProductStore.repositories.ProductRepository;
+import com.softuni.jsonProductStore.services.CategoryService;
+import com.softuni.jsonProductStore.services.ProductService;
+import com.softuni.jsonProductStore.services.UserService;
+import com.softuni.jsonProductStore.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class ProductServiceImpl implements ProductService {
+    private final ProductRepository productRepository;
+    private final ModelMapper mapper;
+    private final ValidationUtil validationUtil;
+    private final UserService userService;
+    private final CategoryService categoryService;
+    private final Random random;
+
+    @Autowired
+    public ProductServiceImpl(ProductRepository productRepository,
+                              ModelMapper mapper, ValidationUtil validationUtil,
+                              UserService userService, CategoryService categoryService, Random random) {
+        this.productRepository = productRepository;
+        this.mapper = mapper;
+        this.validationUtil = validationUtil;
+        this.userService = userService;
+        this.categoryService = categoryService;
+        this.random = random;
+    }
+
+    @Override
+    public void seedProducts(ProductSeedDto[] productSeedDtos) {
+        if (this.productRepository.count() != 0) {
+            return;
+        }
+        List<Product> productList = new LinkedList<>();
+        Arrays.stream(productSeedDtos).forEach(p -> {
+            Product product = this.mapper.map(p, Product.class);
+            User seller = this.userService.getRandomUser();
+            User buyer = this.userService.getRandomUser();
+            product.setSeller(seller);
+            int randomNum = this.random.nextInt(2);
+            if (randomNum == 1) {
+                product.setBuyer(this.userService.getRandomUser());
+            }
+            product.setCategories(new HashSet<Category>(this.categoryService.getRandomCategories()));
+
+            productList.add(product);
+            if (this.validationUtil.isValid(product)) {
+                this.productRepository.saveAndFlush(product);
+            } else {
+                this.validationUtil.getViolation(productSeedDtos)
+                        .stream()
+                        .map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+            }
+        });
+
+
+    }
+
+    @Override
+    public List<ProductAndSellerDto> getAllProductInRange() {
+        return this.productRepository.findAllByPriceBetweenAndBuyerIsNull(BigDecimal.valueOf(500),
+                BigDecimal.valueOf(1000)).stream().map(product -> {
+            ProductAndSellerDto productAndSellerDto = this.mapper.map(product, ProductAndSellerDto.class);
+
+            productAndSellerDto.setSeller(String.format("%s %s", product.getSeller().getFirstName(),
+                    product.getSeller().getLastName()));
+            return productAndSellerDto;
+        }).collect(Collectors.toList());
+    }
+}
