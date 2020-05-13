@@ -1,0 +1,95 @@
+package com.softuni.jsonProductStore.services.impl;
+
+import com.softuni.jsonProductStore.models.dtos.*;
+import com.softuni.jsonProductStore.models.entities.User;
+import com.softuni.jsonProductStore.repositories.UserRepository;
+import com.softuni.jsonProductStore.services.UserService;
+import com.softuni.jsonProductStore.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
+    private final ModelMapper mapper;
+    private final ValidationUtil validationUtil;
+    private final Random random;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, ModelMapper mapper, ValidationUtil validationUtil, Random random) {
+        this.userRepository = userRepository;
+        this.mapper = mapper;
+        this.validationUtil = validationUtil;
+        this.random = random;
+    }
+
+    @Override
+    public void seedUsersDto(UserSeedDto[] userSeedDtos) {
+        if (this.userRepository.count() != 0) {
+            return;
+        }
+        Arrays.stream(userSeedDtos).forEach(u -> {
+            User user = this.mapper.map(u, User.class);
+            if (this.validationUtil.isValid(user)) {
+                this.userRepository.saveAndFlush(user);
+            } else {
+                this.validationUtil.getViolation(userSeedDtos)
+                        .stream()
+                        .map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+            }
+        });
+    }
+
+    @Override
+    public User getRandomUser() {
+        int id = this.random.nextInt((int) this.userRepository.count() + 1);
+        return this.userRepository.getUserById(id);
+
+    }
+
+    @Override
+    public List<SellerAndProductDto> sellerProductAndBuyer() {
+        return this.userRepository.findAllThatSoldSomething().stream().map(user -> {
+            final SellerAndProductDto sellerDto =
+                    this.mapper.map(user, SellerAndProductDto.class);
+            sellerDto.setSoldProducts(user.getSold().stream()
+                    .filter(sale -> sale.getBuyer() != null)
+                    .map(sale -> this.mapper.map(sale, ProductAndBuyerDto.class))
+                    .collect(Collectors.toSet()));
+
+            return sellerDto;
+        }).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public UsersAndProductsViewDto usersAndProducts() {
+        List<UsersAndProductsDto> usersAndProductsDtos = this.userRepository.findAllThatSoldSomething().stream().map(user -> {
+            final UsersAndProductsDto userDto = this.mapper.map(user, UsersAndProductsDto.class);
+            userDto.setSoldProducts(user.getSold().stream()
+                    .filter(sale -> sale.getBuyer() != null)
+                    .map(sale -> this.mapper.map(sale, ProductNameAndPriceDto.class))
+                    .collect(Collectors.toSet()));
+            return userDto;
+        }).sorted((a, b) -> {
+            int diff = b.getSoldProducts().size() - a.getSoldProducts().size();
+            if (diff == 0) {
+                diff = a.getLastName().compareTo(b.getLastName());
+            }
+            return diff;
+
+        }).collect(Collectors.toList());
+
+        return new UsersAndProductsViewDto(usersAndProductsDtos.size(), usersAndProductsDtos);
+    }
+}
