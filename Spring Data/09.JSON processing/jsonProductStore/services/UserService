@@ -1,0 +1,18 @@
+package com.softuni.jsonProductStore.services;
+
+import com.softuni.jsonProductStore.models.dtos.SellerAndProductDto;
+import com.softuni.jsonProductStore.models.dtos.UserSeedDto;
+import com.softuni.jsonProductStore.models.dtos.UsersAndProductsViewDto;
+import com.softuni.jsonProductStore.models.entities.User;
+
+import java.util.List;
+
+public interface UserService {
+    void seedUsersDto(UserSeedDto[] userSeedDtos);
+
+    User getRandomUser();
+
+    List<SellerAndProductDto> sellerProductAndBuyer();
+
+    UsersAndProductsViewDto usersAndProducts();
+}
