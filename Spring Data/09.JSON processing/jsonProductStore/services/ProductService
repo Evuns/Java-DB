@@ -1,0 +1,13 @@
+package com.softuni.jsonProductStore.services;
+
+import com.softuni.jsonProductStore.models.dtos.ProductAndSellerDto;
+import com.softuni.jsonProductStore.models.dtos.ProductSeedDto;
+
+import java.util.List;
+
+public interface ProductService {
+    void seedProducts(ProductSeedDto[] productSeedDtos);
+
+    List<ProductAndSellerDto> getAllProductInRange();
+
+}
