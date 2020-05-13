@@ -1,0 +1,79 @@
+package com.softuni.jsonProductStore.services.impl;
+
+import com.softuni.jsonProductStore.models.dtos.CategoryProductsDto;
+import com.softuni.jsonProductStore.models.dtos.CategorySeedDto;
+import com.softuni.jsonProductStore.models.entities.Category;
+import com.softuni.jsonProductStore.models.entities.Product;
+import com.softuni.jsonProductStore.repositories.CategoryRepository;
+import com.softuni.jsonProductStore.services.CategoryService;
+import com.softuni.jsonProductStore.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class CategoryServiceImpl implements CategoryService {
+
+    private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final Random random;
+
+    @Autowired
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ModelMapper modelMapper, ValidationUtil validationUtil, Random random) {
+        this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.random = random;
+    }
+
+    @Override
+    public void seedCategories(CategorySeedDto[] categorySeedDtos) {
+        if (this.categoryRepository.count() != 0) {
+            return;
+        }
+        Arrays.stream(categorySeedDtos).forEach(c -> {
+            Category category = this.modelMapper.map(c, Category.class);
+            if (this.validationUtil.isValid(category)) {
+                this.categoryRepository.saveAndFlush(category);
+            } else {
+                this.validationUtil.getViolation(categorySeedDtos)
+                        .stream()
+                        .map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+            }
+        });
+
+    }
+
+    @Override
+    public HashSet<Category> getRandomCategories() {
+        HashSet<Category> resultList = new HashSet<>();
+        int randomCounter = this.random.nextInt(3) + 1;
+        for (int i = 0; i < randomCounter; i++) {
+            int randomId = random.nextInt((int) this.categoryRepository.count() + 1);
+            resultList.add(this.categoryRepository.getById(randomId));
+
+        }
+        return resultList;
+    }
+
+    @Override
+    public List<CategoryProductsDto> categoryByProducts() {
+        return this.categoryRepository.getAllCategory().stream().map(category -> {
+            int productCount = category.getProducts().size();
+            BigDecimal totalRevenue = category.getProducts().stream()
+                    .map(Product::getPrice).reduce(BigDecimal.valueOf(0), BigDecimal::add);
+            BigDecimal averagePrice = totalRevenue.divide(BigDecimal.valueOf(productCount), 1);
+            return new CategoryProductsDto(category.getName(),
+                    productCount, averagePrice, totalRevenue);
+        }).collect(Collectors.toList());
+    }
+}
