@@ -1,0 +1,17 @@
+package com.softuni.jsonProductStore.services;
+
+import com.softuni.jsonProductStore.models.dtos.CategoryProductsDto;
+import com.softuni.jsonProductStore.models.dtos.CategorySeedDto;
+import com.softuni.jsonProductStore.models.entities.Category;
+
+import java.util.HashSet;
+import java.util.List;
+
+public interface CategoryService {
+
+    void seedCategories(CategorySeedDto[] categorySeedDtos);
+
+    HashSet<Category> getRandomCategories();
+
+    List<CategoryProductsDto> categoryByProducts();
+}
