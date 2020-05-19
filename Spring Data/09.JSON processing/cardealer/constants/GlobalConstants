@@ -1,0 +1,10 @@
+package com.example.cardealer.constants;
+
+public class GlobalConstants {
+    public static final String SUPPLIERS_PATH = "src/main/resources/files/suppliers.json";
+    public static final String PARTS_PATH = "src/main/resources/files/parts.json";
+    public static final String CARS_PATH = "src/main/resources/files/cars.json";
+    public static final String CUSTOMERS_PATH = "src/main/resources/files/customers.json";
+    public static final String QUERY_ONE_PATH = "src/main/resources/files/outputQuery1";
+    public static final String QUERY_TWO_PATH = "src/main/resources/files/outputQuery2";
+}
