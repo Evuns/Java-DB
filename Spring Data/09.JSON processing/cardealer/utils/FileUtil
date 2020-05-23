@@ -1,0 +1,9 @@
+package com.example.cardealer.utils;
+
+import java.io.IOException;
+
+public interface FileUtil {
+    void write(String content, String path) throws IOException;
+
+    String readFileContent(String path) throws IOException;
+}
