@@ -1,0 +1,66 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.CarForCustomerDto;
+import com.example.cardealer.models.dtos.CustomersByBirthDateDto;
+import com.example.cardealer.models.dtos.CustomersSeedDto;
+import com.example.cardealer.models.dtos.SaleForCustomerDto;
+import com.example.cardealer.models.entities.Customer;
+import com.example.cardealer.repositories.CustomerRepository;
+import com.example.cardealer.services.CustomerService;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class CustomerServiceImpl implements CustomerService {
+
+    private final ModelMapper modelMapper;
+    private final CustomerRepository customerRepository;
+
+    public CustomerServiceImpl(ModelMapper modelMapper, CustomerRepository customerRepository) {
+        this.modelMapper = modelMapper;
+        this.customerRepository = customerRepository;
+    }
+
+    @Override
+    public void seedCustomers(CustomersSeedDto[] customersSeedDtos) {
+        Arrays.stream(customersSeedDtos).forEach(c->{
+            if(this.customerRepository.findByNameAndBirthDate(c.getName(),c.getBirthDate()) == null) {
+                Customer customer = this.modelMapper.map(c, Customer.class);
+                this.customerRepository.saveAndFlush(customer);
+            } else{
+                System.out.println("These customer already exist.");
+            }
+        });
+
+    }
+
+    @Override
+    public List<Customer> getAll() {
+        return this.customerRepository.findAll();
+    }
+
+    @Override
+    public List<CustomersByBirthDateDto> findAllOrderByBirthday() {
+        return this.customerRepository.
+                findAllOrderByBirthDate().stream().map(customer -> {
+                                final CustomersByBirthDateDto customersByBirthDate = this.modelMapper.
+                            map(customer, CustomersByBirthDateDto.class);
+            customersByBirthDate.setSales(customer
+                    .getSales()
+                    .stream()
+                    .map(sale -> {
+                        final SaleForCustomerDto saleForCustomerDto = this.modelMapper.map(sale, SaleForCustomerDto.class);
+                        saleForCustomerDto.setCar(this.modelMapper.map(sale.getCar(), CarForCustomerDto.class));
+                        return saleForCustomerDto;
+                    })
+                    .collect(Collectors.toSet()));
+                    return customersByBirthDate;
+        }).collect(Collectors.toList());
+    }
+}
