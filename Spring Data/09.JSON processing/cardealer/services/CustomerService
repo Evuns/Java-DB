@@ -1,0 +1,15 @@
+package com.example.cardealer.services;
+
+import com.example.cardealer.models.dtos.CustomersByBirthDateDto;
+import com.example.cardealer.models.dtos.CustomersSeedDto;
+import com.example.cardealer.models.entities.Customer;
+
+import java.util.List;
+
+public interface CustomerService {
+    void seedCustomers(CustomersSeedDto[] customersSeedDtos);
+
+    List<Customer> getAll();
+
+    List<CustomersByBirthDateDto> findAllOrderByBirthday();
+}
