@@ -1,0 +1,15 @@
+package com.example.cardealer.services;
+
+import com.example.cardealer.models.dtos.CarSeedDto;
+import com.example.cardealer.models.dtos.CarsMakeByToyota;
+import com.example.cardealer.models.entities.Car;
+
+import java.util.List;
+
+public interface CarService {
+    void seedCars(CarSeedDto[] carSeedDtos);
+
+    List<Car> getAll();
+
+    List<CarsMakeByToyota> carsFromToyota(final String name);
+}
