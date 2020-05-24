@@ -1,0 +1,54 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.PartsSeedDto;
+import com.example.cardealer.models.entities.Part;
+import com.example.cardealer.models.entities.Supplier;
+import com.example.cardealer.repositories.PartRepository;
+import com.example.cardealer.services.PartService;
+import com.example.cardealer.services.SupplierService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+@Service
+@Transactional
+public class PartServiceImpl implements PartService {
+    private final PartRepository partRepository;
+    private final ModelMapper modelMapper;
+    private final Random random;
+    private final SupplierService supplierService;
+
+    @Autowired
+    public PartServiceImpl(PartRepository partRepository,
+                           ModelMapper modelMapper, Random random,
+                           SupplierService supplierService) {
+        this.partRepository = partRepository;
+        this.modelMapper = modelMapper;
+        this.random = random;
+        this.supplierService = supplierService;
+    }
+
+    @Override
+    public void seedParts(PartsSeedDto[] partsSeedDtos) {
+        if(this.partRepository.count() != 0){
+            return;
+        }
+       final Part[] parts = this.modelMapper.map(partsSeedDtos,Part[].class);
+       final List<Supplier> suppliers = this.supplierService.getAll();
+        for (final Part part: parts) {
+            part.setSupplier(suppliers.get(random.nextInt(suppliers.size())));
+        }
+        this.partRepository.saveAll(Arrays.asList(parts));
+    }
+
+    @Override
+    public List<Part> getAll() {
+        return this.partRepository.findAll();
+    }
+}
