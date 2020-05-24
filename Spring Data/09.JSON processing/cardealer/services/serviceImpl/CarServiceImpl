@@ -1,0 +1,68 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.CarSeedDto;
+import com.example.cardealer.models.dtos.CarsMakeByToyota;
+import com.example.cardealer.models.entities.Car;
+import com.example.cardealer.models.entities.Part;
+import com.example.cardealer.repositories.CarRepository;
+import com.example.cardealer.services.CarService;
+import com.example.cardealer.services.PartService;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class CarServiceImpl implements CarService {
+    private final CarRepository carRepository;
+    private final ModelMapper modelMapper;
+    private final PartService partService;
+    private final Random random;
+
+    public CarServiceImpl(CarRepository carRepository, ModelMapper modelMapper, PartService partService, Random random) {
+        this.carRepository = carRepository;
+        this.modelMapper = modelMapper;
+        this.partService = partService;
+        this.random = random;
+    }
+
+    @Override
+    public void seedCars(CarSeedDto[] carSeedDtos) {
+        if (this.carRepository.count() != 0) {
+            return;
+        }
+        final Car[] cars = this.modelMapper.map(carSeedDtos, Car[].class);
+        final List<Part> parts = this.partService.getAll();
+
+        for (final Car car : cars) {
+            int num = this.random.nextInt(20);
+            while (num < 10){
+                num = this.random.nextInt(20);
+            }
+            Set<Part> carParts = new HashSet<>();
+            for (int i = 0; i < num; i++) {
+                carParts.add(parts.get(random.nextInt(parts.size())));
+            }
+            car.setParts(carParts);
+        }
+        this.carRepository.saveAll(Arrays.asList(cars));
+    }
+
+    @Override
+    public List<Car> getAll() {
+        return this.carRepository.findAll();
+    }
+
+    @Override
+    public List<CarsMakeByToyota> carsFromToyota(final String make) {
+        return this.carRepository
+                .findByMakeOrderByModelAscTravelledDistanceDesc(make)
+                .stream()
+                .map(car -> this.modelMapper.map(car, CarsMakeByToyota.class))
+                .collect(Collectors.toList());
+    }
+
+}
