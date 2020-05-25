@@ -1,0 +1,48 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.SupplierSeedDto;
+import com.example.cardealer.models.entities.Supplier;
+import com.example.cardealer.repositories.SupplierRepository;
+import com.example.cardealer.services.SupplierService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.validation.ConstraintViolation;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+@Service
+public class SupplierServiceImpl implements SupplierService {
+    private final ModelMapper modelMapper;
+    private final SupplierRepository supplierRepository;
+    private final Random random;
+
+
+    @Autowired
+    public SupplierServiceImpl(ModelMapper modelMapper,
+                               SupplierRepository supplierRepository, Random random) {
+        this.modelMapper = modelMapper;
+        this.supplierRepository = supplierRepository;
+        this.random = random;
+    }
+
+    @Override
+    public void seedSuppliers(SupplierSeedDto[] supplierSeedDtos) {
+        if(this.supplierRepository.count() != 0){
+            return;
+        }
+        Arrays.stream(supplierSeedDtos).forEach(supplierSeedDto -> {
+            Supplier supplier = this.modelMapper.map(supplierSeedDto, Supplier.class);
+                this.supplierRepository.saveAndFlush(supplier);
+        });
+    }
+
+
+    @Override
+    public List<Supplier> getAll() {
+        return this.supplierRepository.findAll();
+    }
+}
