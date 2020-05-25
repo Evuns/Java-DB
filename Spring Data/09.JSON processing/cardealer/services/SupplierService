@@ -1,0 +1,12 @@
+package com.example.cardealer.services;
+
+import com.example.cardealer.models.dtos.SupplierSeedDto;
+import com.example.cardealer.models.entities.Supplier;
+
+import java.util.List;
+
+public interface SupplierService {
+    void seedSuppliers(SupplierSeedDto[] supplierSeedDtos);
+
+    List<Supplier> getAll();
+}
