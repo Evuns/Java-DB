@@ -1,0 +1,37 @@
+package com.example.cardealer.models.dtos;
+
+
+import java.util.Date;
+
+public class CustomersSeedDto {
+    private String name;
+    private Date birthDate;
+    private boolean isYoungDriver;
+
+    public CustomersSeedDto() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public boolean getIsYoungDriver() {
+        return isYoungDriver;
+    }
+
+    public void setYoungDriver(boolean youngDriver) {
+        isYoungDriver = youngDriver;
+    }
+}
