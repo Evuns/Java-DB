@@ -1,0 +1,26 @@
+package com.example.cardealer.models.dtos;
+
+public class SaleForCustomerDto {
+
+    private int discount;
+    private CarForCustomerDto car;
+
+    public SaleForCustomerDto() {
+    }
+
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public CarForCustomerDto getCar() {
+        return car;
+    }
+
+    public void setCar(CarForCustomerDto car) {
+        this.car = car;
+    }
+}
