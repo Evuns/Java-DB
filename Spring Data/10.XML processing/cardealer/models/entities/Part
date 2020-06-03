@@ -1,0 +1,65 @@
+package com.example.cardealer.models.entities;
+
+import org.springframework.lang.NonNull;
+
+import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Set;
+
+@Entity
+@Table(name = "parts")
+public class Part extends BaseEntity {
+    private String name;
+    private double price;
+    private int quantity;
+    private List<Car> cars;
+    private Supplier supplier;
+
+    public Part() {
+    }
+
+    @Column
+   @NotNull( message = "Name can not be empty")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Column
+    @Min(value = 0, message = "Price must be positive number")
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Column
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @ManyToMany(mappedBy = "parts")
+    public List<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
+
+    @ManyToOne
+    public Supplier getSupplier() {
+        return supplier;
+    }
+
