@@ -1,0 +1,9 @@
+package com.example.cardealer.constants;
+
+public class GlobalConstants {
+    public static final String SUPPLIERS_PATH = "src/main/resources/files/suppliers.xml";
+    public static final String PARTS_PATH = "src/main/resources/files/parts.xml";
+    public static final String CARS_PATH = "src/main/resources/files/cars.xml";
+    public static final String CUSTOMERS_PATH = "src/main/resources/files/customers.xml";
+    public static final String QUERY_ONE_PATH = "src/main/resources/files/query1.xml";
+}
