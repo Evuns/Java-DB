@@ -1,0 +1,98 @@
+package com.example.cardealer.controllers;
+
+import com.example.cardealer.constants.GlobalConstants;
+import com.example.cardealer.models.dtos.*;
+import com.example.cardealer.services.*;
+import com.example.cardealer.utils.FileUtil;
+import com.example.cardealer.utils.XmlParserImpl;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
+
+
+@Component
+public class AppController implements CommandLineRunner {
+    private final XmlParserImpl xmlParserImpl;
+    private final SupplierService supplierService;
+    private final PartService partService;
+    private final CarService carService;
+    private final CustomerService customerService;
+    private final SaleService saleService;
+
+
+    public AppController(XmlParserImpl xmlParserImpl, SupplierService supplierService,
+                         PartService partService, CarService carService,
+                         CustomerService customerService, SaleService saleService,
+                         FileUtil fileUtil) {
+
+        this.xmlParserImpl = xmlParserImpl;
+        this.supplierService = supplierService;
+        this.partService = partService;
+        this.carService = carService;
+        this.customerService = customerService;
+        this.saleService = saleService;
+
+    }
+
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        // seedDatabase();
+        firstQuery();
+        secondQuery();
+
+    }
+
+    private void secondQuery() {
+
+    }
+
+    private void firstQuery() throws JAXBException {
+        CustomerViewRootDto customerViewRootDto = this.customerService.getAllOrderedCustomers();
+        this.xmlParserImpl.objectToFile(GlobalConstants.QUERY_ONE_PATH,customerViewRootDto);
+    }
+
+
+    private void seedDatabase() throws FileNotFoundException, JAXBException {
+        seedSuppliers();
+        seedParts();
+        seedCar();
+        seedCustomers();
+        seedSale();
+    }
+
+    private void seedSale() {
+        this.saleService.generateSale();
+
+    }
+
+    private void seedCustomers() throws FileNotFoundException {
+        CustomerSeedRootDto customerSeedRootDto = this.xmlParserImpl.objectFromFile(
+                GlobalConstants.CUSTOMERS_PATH, CustomerSeedRootDto.class);
+        this.customerService.seedCustomers(customerSeedRootDto.getCustomerSeedDtos());
+    }
+
+    private void seedCar() throws FileNotFoundException {
+        CarSeedRootDto carSeedRootDto = this.xmlParserImpl.objectFromFile(
+                GlobalConstants.CARS_PATH, CarSeedRootDto.class);
+        this.carService.seedCars(carSeedRootDto.getCarSeedDto());
+
+    }
+
+    private void seedParts() throws FileNotFoundException {
+        PartSeedRootDto partSeedRootDto = this.xmlParserImpl.objectFromFile(
+                GlobalConstants.PARTS_PATH, PartSeedRootDto.class);
+        this.partService.seedParts(partSeedRootDto.getParts());
+
+    }
+
+    private void seedSuppliers() throws FileNotFoundException, JAXBException {
+
+        SuppliersSeedRootDto suppliersSeedRootDto = this.xmlParserImpl.objectFromFile(
+                GlobalConstants.SUPPLIERS_PATH, SuppliersSeedRootDto.class);
+        this.supplierService.seedSuppliers(suppliersSeedRootDto.getSuppliers());
+    }
+}
