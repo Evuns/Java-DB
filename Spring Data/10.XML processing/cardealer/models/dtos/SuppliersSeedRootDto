@@ -1,0 +1,25 @@
+package com.example.cardealer.models.dtos;
+
+import javax.xml.bind.annotation.*;
+import java.util.LinkedList;
+import java.util.List;
+
+@XmlRootElement(name = "suppliers")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class SuppliersSeedRootDto {
+
+    @XmlElement(name = "supplier")
+    private List<SupplierSeedDto> suppliers;
+
+    public SuppliersSeedRootDto() {
+        this.suppliers = new LinkedList<>();
+    }
+
+    public List<SupplierSeedDto> getSuppliers() {
+        return suppliers;
+    }
+
+    public void setSuppliers(List<SupplierSeedDto> suppliers) {
+        this.suppliers = suppliers;
+    }
+}
