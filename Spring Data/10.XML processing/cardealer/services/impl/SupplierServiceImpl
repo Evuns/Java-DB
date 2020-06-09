@@ -1,0 +1,63 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.SupplierSeedDto;
+import com.example.cardealer.models.entities.Supplier;
+import com.example.cardealer.repositories.SupplierRepository;
+import com.example.cardealer.services.SupplierService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.util.List;
+import java.util.Random;
+
+@Service
+
+public class SupplierServiceImpl implements SupplierService {
+    private final ModelMapper modelMapper;
+    private final SupplierRepository supplierRepository;
+    private final ValidationUtil validationUtil;
+    private final Random random;
+
+
+    @Autowired
+    public SupplierServiceImpl(ModelMapper modelMapper,
+                               SupplierRepository supplierRepository, ValidationUtil validationUtil, Random random) {
+        this.modelMapper = modelMapper;
+        this.supplierRepository = supplierRepository;
+        this.validationUtil = validationUtil;
+        this.random = random;
+    }
+
+    @Override
+    public void seedSuppliers(List<SupplierSeedDto> supplierSeedDtos) {
+        if (this.supplierRepository.count() != 0) {
+            return;
+        }
+        supplierSeedDtos.forEach(supplierSeedDto -> {
+            if (this.validationUtil.isValid(supplierSeedDto)) {
+                if (this.supplierRepository.findByName(supplierSeedDto.getName()) == null) {
+                    Supplier supplier = this.modelMapper.map(supplierSeedDto, Supplier.class);
+                    this.supplierRepository.saveAndFlush(supplier);
+                } else {
+                    System.out.println("This supplier already existed");
+                }
+
+            } else {
+                this.validationUtil.getViolation(supplierSeedDto).stream().map(ConstraintViolation::getMessage)
+                .forEach(System.out::println);
+            }
+        });
+
+    }
+
+
+    @Override
+    public Supplier getRandomSupplier(){
+int randomId = this.random.nextInt((int)this.supplierRepository.count()) + 1;
+return this.supplierRepository.findById(randomId);
+    }
+}
