@@ -1,0 +1,49 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.entities.Car;
+import com.example.cardealer.models.entities.Customer;
+import com.example.cardealer.models.entities.Sale;
+import com.example.cardealer.repositories.SaleRepository;
+import com.example.cardealer.services.CarService;
+import com.example.cardealer.services.CustomerService;
+import com.example.cardealer.services.SaleService;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+@Service
+public class SaleServiceImpl implements SaleService {
+    private final CarService carService;
+    private final CustomerService customerService;
+    private final SaleRepository saleRepository;
+    private final Random random;
+
+    public SaleServiceImpl(CarService carService, CustomerService customerService,
+                           SaleRepository saleRepository, Random random) {
+        this.carService = carService;
+        this.customerService = customerService;
+        this.saleRepository = saleRepository;
+        this.random = random;
+    }
+
+    @Override
+    public void generateSale() {
+        List<Car> cars = this.carService.getAll();
+        List<Customer> customers = this.customerService.getAll();
+        final int[] discounts = {0,5,10,15,20,30,40,50};
+
+        List<Sale> sales = new LinkedList<>();
+
+        for (final Car car:cars) {
+            Sale sale = new Sale();
+            sale.setCar(car);
+            sale.setCustomer(customers.get(random.nextInt(customers.size())));
+            sale.setDiscount(discounts[random.nextInt(discounts.length)]);
+            sales.add(sale);
+        }
+            this.saleRepository.saveAll(sales);
+    }
+}
