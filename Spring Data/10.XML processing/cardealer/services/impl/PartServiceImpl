@@ -1,0 +1,80 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.PartSeedDto;
+import com.example.cardealer.models.entities.Part;
+import com.example.cardealer.models.entities.Supplier;
+import com.example.cardealer.repositories.PartRepository;
+import com.example.cardealer.services.PartService;
+import com.example.cardealer.services.SupplierService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+@Service
+@Transactional
+public class PartServiceImpl implements PartService {
+    private final PartRepository partRepository;
+    private final ModelMapper modelMapper;
+    private final Random random;
+    private final SupplierService supplierService;
+    private final ValidationUtil validationUtil;
+
+    @Autowired
+    public PartServiceImpl(PartRepository partRepository,
+                           ModelMapper modelMapper, Random random,
+                           SupplierService supplierService, ValidationUtil validationUtil) {
+        this.partRepository = partRepository;
+        this.modelMapper = modelMapper;
+        this.random = random;
+        this.supplierService = supplierService;
+        this.validationUtil = validationUtil;
+    }
+
+    @Override
+    public void seedParts(List<PartSeedDto> partsSeedDtos) {
+        if (this.partRepository.count() != 0) {
+            return;
+        }
+        partsSeedDtos.forEach(partSeedDto -> {
+            if (this.validationUtil.isValid(partSeedDto)) {
+                if (this.partRepository.findByName(partSeedDto.getName()) == null) {
+                    Part part = this.modelMapper.map(partSeedDto, Part.class);
+                    Supplier supplier = this.supplierService.getRandomSupplier();
+                    part.setSupplier(supplier);
+                    this.partRepository.saveAndFlush(part);
+                } else {
+                    System.out.println("This part already existed");
+                }
+
+            } else {
+                this.validationUtil.getViolation(partSeedDto).stream().map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+            }
+        });
+
+    }
+
+    @Override
+    public List<Part> getAll() {
+        return this.partRepository.findAll();
+    }
+
+    @Override
+    public Set<Part> getRandomParts() {
+        int randomCounter = this.random.nextInt(10) + 10;
+        Set<Part> resultSet = new HashSet<>();
+        for (int i = 0; i < randomCounter; i++) {
+            int randomId = this.random.nextInt((int) partRepository.count() + 1);
+            resultSet.add(this.partRepository.findById(randomId));
+        }
+        return resultSet;
+    }
+}
