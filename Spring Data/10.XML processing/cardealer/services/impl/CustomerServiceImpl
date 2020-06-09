@@ -1,0 +1,66 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.CustomerSeedDto;
+import com.example.cardealer.models.dtos.CustomerViewDto;
+import com.example.cardealer.models.dtos.CustomerViewRootDto;
+import com.example.cardealer.models.entities.Customer;
+import com.example.cardealer.repositories.CustomerRepository;
+import com.example.cardealer.services.CustomerService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class CustomerServiceImpl implements CustomerService {
+
+    private final ModelMapper modelMapper;
+    private final CustomerRepository customerRepository;
+    private final ValidationUtil validationUtil;
+
+    public CustomerServiceImpl(ModelMapper modelMapper, CustomerRepository customerRepository, ValidationUtil validationUtil) {
+        this.modelMapper = modelMapper;
+        this.customerRepository = customerRepository;
+        this.validationUtil = validationUtil;
+    }
+
+    @Override
+    public void seedCustomers(List<CustomerSeedDto> customersSeedDtos) {
+        customersSeedDtos.forEach(c -> {
+            if (this.validationUtil.isValid(c)) {
+                if (this.customerRepository.findByNameAndBirthDate(c.getName(),c.getBirthDate()) == null) {
+                    Customer customer = this.modelMapper.map(c, Customer.class);
+                    this.customerRepository.saveAndFlush(customer);
+                } else{
+                    System.out.println("These customer is already registered.");
+                }
+            } else {
+                this.validationUtil.getViolation(customersSeedDtos).stream().map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+
+            }
+        });
+
+    }
+
+    @Override
+    public List<Customer> getAll() {
+        return this.customerRepository.findAll();
+    }
+
+    @Override
+    public CustomerViewRootDto getAllOrderedCustomers() {
+        CustomerViewRootDto customerViewRootDto = new CustomerViewRootDto();
+        List<CustomerViewDto> customerViewDtos = this.customerRepository
+                .findAllByBirthDateAndIsYoungDriver()
+                .stream().map(c-> this.modelMapper.map(c,CustomerViewDto.class))
+                .collect(Collectors.toList());
+        customerViewRootDto.setCustomerViewDto(customerViewDtos);
+        return customerViewRootDto;
+    }
+}
