@@ -1,0 +1,16 @@
+package com.example.cardealer.services;
+
+import com.example.cardealer.models.dtos.CustomerSeedDto;
+import com.example.cardealer.models.dtos.CustomerViewRootDto;
+import com.example.cardealer.models.entities.Customer;
+
+import java.util.List;
+
+public interface CustomerService {
+    void seedCustomers(List<CustomerSeedDto> customerSeedDtos);
+
+    List<Customer> getAll();
+
+    CustomerViewRootDto getAllOrderedCustomers();
+    
+}
