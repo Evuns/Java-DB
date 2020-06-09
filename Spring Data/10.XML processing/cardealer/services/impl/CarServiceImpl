@@ -1,0 +1,66 @@
+package com.example.cardealer.services.impl;
+
+import com.example.cardealer.models.dtos.CarSeedDto;
+import com.example.cardealer.models.entities.Car;
+import com.example.cardealer.models.entities.Part;
+import com.example.cardealer.models.entities.Supplier;
+import com.example.cardealer.repositories.CarRepository;
+import com.example.cardealer.services.CarService;
+import com.example.cardealer.services.PartService;
+import com.example.cardealer.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import java.util.*;
+
+@Service
+@Transactional
+public class CarServiceImpl implements CarService {
+    private final CarRepository carRepository;
+    private final ModelMapper modelMapper;
+    private final PartService partService;
+    private final Random random;
+    private final ValidationUtil validationUtil;
+
+    public CarServiceImpl(CarRepository carRepository, ModelMapper modelMapper, PartService partService, Random random, ValidationUtil validationUtil) {
+        this.carRepository = carRepository;
+        this.modelMapper = modelMapper;
+        this.partService = partService;
+        this.random = random;
+        this.validationUtil = validationUtil;
+    }
+
+
+    @Override
+    public void seedCars(List<CarSeedDto> carSeedDtos) {
+        if (this.carRepository.count() != 0) {
+            return;
+        }
+        carSeedDtos.forEach(carSeedDto -> {
+            if (this.validationUtil.isValid(carSeedDto)) {
+                if (this.carRepository.findByMakeAndModelAndTravelledDistance(carSeedDto.getMake(),
+                        carSeedDto.getModel(),carSeedDto.getTravelledDistance()) == null) {
+                    Car car = this.modelMapper.map(carSeedDto, Car.class);
+                    car.setParts(this.partService.getRandomParts());
+                    this.carRepository.saveAndFlush(car);
+                } else {
+                    System.out.println("This car already existed");
+                }
+
+            } else {
+                this.validationUtil.getViolation(carSeedDto).stream().map(ConstraintViolation::getMessage)
+                        .forEach(System.out::println);
+            }
+        });
+
+
+    }
+
+    @Override
+    public List<Car> getAll() {
+        return this.carRepository.findAll();
+    }
+
+}
