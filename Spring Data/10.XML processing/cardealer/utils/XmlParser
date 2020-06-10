@@ -1,0 +1,11 @@
+package com.example.cardealer.utils;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
+
+public interface XmlParser {
+
+    <T> T objectFromFile(String filePath, Class<T> tClass) throws JAXBException, FileNotFoundException;
+
+    <T> void objectToFile(String filePath, T rootDto) throws JAXBException;
+}
