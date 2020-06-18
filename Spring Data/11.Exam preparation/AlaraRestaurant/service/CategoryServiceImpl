@@ -1,0 +1,61 @@
+package alararestaurant.service;
+
+import alararestaurant.domain.entities.Category;
+import alararestaurant.domain.entities.Item;
+import alararestaurant.domain.entities.Position;
+import alararestaurant.repository.CategoryRepository;
+import alararestaurant.repository.PositionRepository;
+import alararestaurant.util.ValidationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CategoryServiceImpl implements CategoryService {
+
+    private final CategoryRepository categoryRepository;
+    private final ValidationUtil validationUtil;
+
+    @Autowired
+    public CategoryServiceImpl(CategoryRepository categoryRepository,
+                               ValidationUtil validationUtil) {
+        this.categoryRepository = categoryRepository;
+        this.validationUtil = validationUtil;
+    }
+
+    @Override
+    public String exportCategoriesByCountOfItems() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        List<Category> categories = this.categoryRepository.findAllCategoriesAndItems();
+        categories.forEach(category -> {
+          stringBuilder.append(String.format(" Category: %s%n", category.getName()));
+          List<Item> items = category.getItems();
+            for (Item item: items) {
+                stringBuilder.append(String.format(
+                   "--- Item Name: %s%n" +
+                   "--- Item Price: %.2f%n" +
+                   "…%n", item.getName(),item.getPrice()));
+            }
+        });
+
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public Category findCategoryByName(String name) {
+        return this.categoryRepository.findByName(name);
+    }
+
+    @Override
+    public void createCategory(String name) {
+        Category category = new Category();
+        category.setName(name);
+        if(this.validationUtil.isValid(category)) {
+            this.categoryRepository.saveAndFlush(category);
+        }
+
+    }
+}
