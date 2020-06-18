@@ -1,0 +1,13 @@
+package alararestaurant.service;
+
+import alararestaurant.domain.entities.Category;
+import alararestaurant.domain.entities.Position;
+
+public interface CategoryService {
+
+    String exportCategoriesByCountOfItems();
+
+    Category findCategoryByName(String name);
+
+    void createCategory(String name);
+}
