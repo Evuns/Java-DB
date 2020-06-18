@@ -1,0 +1,91 @@
+package alararestaurant.service;
+
+import alararestaurant.constants.GlobalConstants;
+import alararestaurant.domain.dtos.ItemsSeedDto;
+import alararestaurant.domain.entities.Category;
+import alararestaurant.domain.entities.Item;
+import alararestaurant.domain.entities.Position;
+import alararestaurant.repository.ItemRepository;
+import alararestaurant.util.ValidationUtil;
+import com.google.gson.Gson;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+@Service
+public class ItemServiceImpl implements ItemService {
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final ItemRepository itemRepository;
+    private final Gson gson;
+    private final CategoryService categoryService;
+
+    public ItemServiceImpl(ModelMapper modelMapper,
+                           ValidationUtil validationUtil,
+                           ItemRepository itemRepository, Gson gson,
+                           CategoryService categoryService) {
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.itemRepository = itemRepository;
+        this.gson = gson;
+        this.categoryService = categoryService;
+    }
+
+
+
+    @Override
+    public Boolean itemsAreImported() {
+        return this.itemRepository.count() > 0;
+    }
+
+    @Override
+    public String readItemsJsonFile() throws IOException {
+        return Files.readString(Path.of(GlobalConstants.ITEMS_FILEPATH));
+    }
+
+    @Override
+    public String importItems(String items) throws FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+        ItemsSeedDto[] itemSeedDto = gson.fromJson(
+                new FileReader(GlobalConstants.ITEMS_FILEPATH), ItemsSeedDto[].class);
+
+        for (ItemsSeedDto itemDto : itemSeedDto) {
+            if (this.validationUtil.isValid(itemDto)) {
+
+                if (this.itemRepository.findByName(itemDto.getName()) == null) {
+
+                    Item item = this.modelMapper.map(itemDto, Item.class);
+                    if (this.categoryService.findCategoryByName(itemDto.getCategory()) == null) {
+                        categoryService.createCategory(itemDto.getCategory());
+                    }
+                   Category category = this.categoryService.findCategoryByName(itemDto.getCategory());
+                    if (category != null) {
+                        item.setCategory(category);
+                        this.itemRepository.saveAndFlush(item);
+                        stringBuilder.append(String.format("Record %s successfully imported.",
+                                item.getName()));
+                    } else{
+                        stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+                    }
+                } else {
+                    stringBuilder.append("Already in DB");
+                }
+            } else {
+                stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+            }
+            stringBuilder.append(System.lineSeparator());
+        }
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public Item findByName(String name) {
+        return this.itemRepository.findByName(name);
+    }
+}
