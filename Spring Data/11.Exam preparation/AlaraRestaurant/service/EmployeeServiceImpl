@@ -1,0 +1,96 @@
+package alararestaurant.service;
+
+import alararestaurant.constants.GlobalConstants;
+import alararestaurant.domain.dtos.EmployeeSeedDto;
+import alararestaurant.domain.entities.Employee;
+import alararestaurant.domain.entities.Position;
+import alararestaurant.repository.EmployeeRepository;
+import alararestaurant.util.FileUtil;
+import alararestaurant.util.ValidationUtil;
+import com.google.gson.Gson;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+
+@Service
+public class EmployeeServiceImpl implements EmployeeService {
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final EmployeeRepository employeeRepository;
+    private final Gson gson;
+    private final FileUtil fileUtil;
+    private final PositionService positionService;
+
+    @Autowired
+    public EmployeeServiceImpl(ModelMapper modelMapper,
+                               ValidationUtil validationUtil,
+                               EmployeeRepository employeeRepository, Gson gson,
+                               FileUtil fileUtil, PositionService positionService) {
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.employeeRepository = employeeRepository;
+        this.gson = gson;
+        this.fileUtil = fileUtil;
+        this.positionService = positionService;
+    }
+
+
+    @Override
+    public Boolean employeesAreImported() {
+        return this.employeeRepository.count() > 0;
+    }
+
+    @Override
+    public String readEmployeesJsonFile() throws IOException {
+        return fileUtil.readFile(GlobalConstants.EMPLOYEES_FILE_PATH);
+    }
+
+    @Override
+    public String importEmployees(String employees) throws FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+        EmployeeSeedDto[] employeeSeedDto = gson.fromJson(
+                new FileReader(GlobalConstants.EMPLOYEES_FILE_PATH), EmployeeSeedDto[].class);
+
+        for (EmployeeSeedDto employeeDto : employeeSeedDto) {
+            if (this.validationUtil.isValid(employeeDto)) {
+
+                if (this.employeeRepository.findByName(employeeDto.getName()) == null) {
+
+                    Employee employee = this.modelMapper.map(employeeDto, Employee.class);
+                    if (this.positionService.findPositionByName(employeeDto.getPosition()) == null) {
+                        positionService.createPosition(employeeDto.getPosition());
+                    }
+                    Position position = this.positionService.findPositionByName(employeeDto.getPosition());
+                    if (position != null) {
+                        employee.setPosition(position);
+                        this.employeeRepository.saveAndFlush(employee);
+                        stringBuilder.append(String.format("Record %s successfully imported.",
+                               employee.getName()));
+                    } else{
+                        stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+                    }
+                } else {
+                    stringBuilder.append("Already in DB");
+                }
+            } else {
+                stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+            }
+            stringBuilder.append(System.lineSeparator());
+        }
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public Employee findByName(String name) {
+        return this.employeeRepository.findByName(name);
+    }
+
+
+}
+
