@@ -1,0 +1,103 @@
+package alararestaurant.service;
+
+
+import alararestaurant.constants.GlobalConstants;
+import alararestaurant.domain.dtos.ItemsForOrderSeedDto;
+import alararestaurant.domain.dtos.OrderSeedDto;
+import alararestaurant.domain.dtos.OrdersSeedRootDto;
+import alararestaurant.domain.entities.Employee;
+import alararestaurant.domain.entities.Item;
+import alararestaurant.domain.entities.Order;
+import alararestaurant.repository.OrderRepository;
+import alararestaurant.util.ValidationUtil;
+import alararestaurant.util.XmlParser;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class OrderServiceImpl implements OrderService {
+    private final ModelMapper modelMapper;
+    private final OrderRepository orderRepository;
+    private final ValidationUtil validator;
+    private final XmlParser xmlParser;
+    private final ItemService itemService;
+    private final EmployeeService employeeService;
+
+    public OrderServiceImpl(ModelMapper modelMapper, OrderRepository orderRepository,
+                            ValidationUtil validator, XmlParser xmlParser,
+                            ItemService itemService, EmployeeService employeeService) {
+        this.modelMapper = modelMapper;
+        this.orderRepository = orderRepository;
+        this.validator = validator;
+        this.xmlParser = xmlParser;
+        this.itemService = itemService;
+        this.employeeService = employeeService;
+    }
+
+    @Override
+    public Boolean ordersAreImported() {
+        return this.orderRepository.count() > 0;
+    }
+
+    @Override
+    public String readOrdersXmlFile() throws IOException {
+        return Files.readString(Path.of(GlobalConstants.ORDERS_FILE_PATH));
+    }
+
+    @Override
+    public String importOrders() throws JAXBException, FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        OrdersSeedRootDto orderSeedRootDto = this.xmlParser.parseXml(OrdersSeedRootDto.class,
+                GlobalConstants.ORDERS_FILE_PATH);
+
+        List<OrderSeedDto> orderSeedDtos = orderSeedRootDto.getOrders();
+        for (OrderSeedDto orderSeedDto : orderSeedDtos) {
+            if (this.validator.isValid(orderSeedDto)) {
+                if (this.employeeService.findByName(orderSeedDto.getEmployee()) != null) {
+                    Employee employee = this.employeeService.findByName(orderSeedDto.getEmployee());
+                    Order order = this.modelMapper.map(orderSeedDto, Order.class);
+                    List<ItemsForOrderSeedDto> itemsDto = orderSeedDto.getItems().getItems();
+                    boolean dontAdd = false;
+                    for (ItemsForOrderSeedDto itemDto : itemsDto) {
+                        Item item = this.itemService.findByName(itemDto.getName());
+                        if (item == null) {
+                            dontAdd = true;
+                            break;
+                        }
+                    }
+                    if (!dontAdd) {
+                        order.setEmployee(employee);
+                        this.orderRepository.saveAndFlush(order);
+                        stringBuilder.append(String.format("Order for %s on %s added",
+                                order.getCustomer(), order.getDateTime().toString()));
+                    } else {
+                        stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+                    }
+                } else {
+                    stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+                }
+            } else {
+                stringBuilder.append(GlobalConstants.ERROR_MESSAGE);
+            }
+            stringBuilder.append(System.lineSeparator());
+
+        }
+        return stringBuilder.toString();
+
+    }
+
+    @Override
+    public String exportOrdersFinishedByTheBurgerFlippers() {
+        // TODO : Implement me
+        return null;
+    }
+}
