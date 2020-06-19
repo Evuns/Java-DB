@@ -1,0 +1,13 @@
+package alararestaurant.service;
+
+import alararestaurant.domain.entities.Employee;
+import alararestaurant.domain.entities.Position;
+import org.springframework.stereotype.Service;
+
+@Service
+public interface PositionService {
+
+    Position findPositionByName(String name);
+
+    void createPosition(String name);
+}
