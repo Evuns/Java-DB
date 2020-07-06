@@ -1,0 +1,38 @@
+package hiberspring.domain.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+@Entity
+@Table(name = "towns")
+public class Town extends BaseEntity {
+
+    private String name;
+    private int population;
+
+    public Town() {
+    }
+
+    @Column
+    @NotNull
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Column
+    @Min(0)
+    public int getPopulation() {
+        return population;
+    }
+
+    public void setPopulation(int population) {
+        this.population = population;
+    }
+}
