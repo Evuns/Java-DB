@@ -1,0 +1,88 @@
+package hiberspring.service.impl;
+
+import com.google.gson.Gson;
+import hiberspring.common.GlobalConstants;
+import hiberspring.domain.dto.BranchSeedDto;
+import hiberspring.domain.dto.TownSeedDto;
+import hiberspring.domain.entity.Branch;
+import hiberspring.domain.entity.Town;
+import hiberspring.repository.BranchRepository;
+import hiberspring.service.BranchService;
+import hiberspring.service.TownService;
+import hiberspring.util.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+@Service
+@Transactional
+public class BranchServiceImpl implements BranchService {
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final BranchRepository branchRepository;
+    private final TownService townService;
+    private final Gson gson;
+
+    @Autowired
+    public BranchServiceImpl(ModelMapper modelMapper,
+                             ValidationUtil validationUtil,
+                             BranchRepository branchRepository,
+                             TownService townService, Gson gson) {
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.branchRepository = branchRepository;
+        this.townService = townService;
+        this.gson = gson;
+    }
+
+
+    @Override
+    public Boolean branchesAreImported() {
+        return this.branchRepository.count() > 0;
+    }
+
+    @Override
+    public String readBranchesJsonFile() throws IOException {
+        return Files.readString(Path.of(GlobalConstants.BRANCHES_FILE_PATH));
+    }
+
+    @Override
+    public String importBranches(String branchesFileContent) throws FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+        BranchSeedDto[] branchSeedDto = this.gson.fromJson(
+                new FileReader(GlobalConstants.BRANCHES_FILE_PATH), BranchSeedDto[].class);
+
+        Arrays.stream(branchSeedDto).forEach(branchDto ->{
+            if(this.validationUtil.isValid(branchDto)){
+                Town town = this.townService.getTownByName(branchDto.getTown());
+                if(town == null){
+                    stringBuilder.append("Error: Invalid data.");
+                } else{
+                    Branch branch = this.modelMapper.map(branchDto, Branch.class);
+                    branch.setTown(town);
+                    this.branchRepository.saveAndFlush(branch);
+                    stringBuilder.append(String.format("Successfully imported Branch %s", branch.getName()));
+
+                }
+            } else{
+                stringBuilder.append("Error: Invalid data.");
+            }
+            stringBuilder.append(System.lineSeparator());
+        });
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public Branch getByName(String name) {
+        return this.branchRepository.findByName(name);
+    }
+}
