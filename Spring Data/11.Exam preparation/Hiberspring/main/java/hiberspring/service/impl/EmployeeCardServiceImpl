@@ -1,0 +1,83 @@
+package hiberspring.service.impl;
+
+
+import com.google.gson.Gson;
+import hiberspring.common.GlobalConstants;
+import hiberspring.domain.dto.EmployeeCardSeedDto;
+import hiberspring.domain.entity.EmployeeCard;
+import hiberspring.repository.EmployeeCardRepository;
+import hiberspring.service.EmployeeCardService;
+import hiberspring.util.ValidationUtil;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+@Service
+@Transactional
+public class EmployeeCardServiceImpl implements EmployeeCardService {
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final EmployeeCardRepository employeeCardRepository;
+    private final Gson gson;
+
+
+    @Autowired
+    public EmployeeCardServiceImpl(ModelMapper modelMapper,
+                                   ValidationUtil validationUtil,
+                                   EmployeeCardRepository employeeCardRepository, Gson gson) {
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.employeeCardRepository = employeeCardRepository;
+        this.gson = gson;
+    }
+
+
+    @Override
+    public Boolean employeeCardsAreImported() {
+        return this.employeeCardRepository.count() > 0;
+    }
+
+    @Override
+    public String readEmployeeCardsJsonFile() throws IOException {
+        return Files.readString(Path.of(GlobalConstants.EMPLOYEE_CARDS_FILE_PATH));
+    }
+
+    @Override
+    public String importEmployeeCards(String employeeCardsFileContent) throws FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+        EmployeeCardSeedDto[] employeeCardSeedDto = this.gson.fromJson(
+                new FileReader(GlobalConstants.EMPLOYEE_CARDS_FILE_PATH), EmployeeCardSeedDto[].class);
+        Arrays.stream(employeeCardSeedDto).forEach(employeeCardDto -> {
+            if (this.validationUtil.isValid(employeeCardDto)) {
+                EmployeeCard employeeCard = this.modelMapper.map(employeeCardDto, EmployeeCard.class);
+                if (this.employeeCardRepository.findByNumber(employeeCard.getNumber()) == null) {
+                    this.employeeCardRepository.saveAndFlush(employeeCard);
+                    stringBuilder.append(String.format("Successfully imported Employee Card %s.",
+                            employeeCard.getNumber()));
+                } else {
+                    stringBuilder.append("This employee card is already in tha data base.");
+                }
+
+            } else {
+                stringBuilder.append("Error: Invalid data.");
+            }
+            stringBuilder.append(System.lineSeparator());
+        });
+
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public EmployeeCard getByNumber(String number) {
+        return this.employeeCardRepository.findByNumber(number);
+    }
+}
