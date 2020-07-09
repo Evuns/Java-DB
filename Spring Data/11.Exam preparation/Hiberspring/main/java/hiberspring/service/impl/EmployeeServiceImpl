@@ -1,0 +1,122 @@
+package hiberspring.service.impl;
+
+import hiberspring.common.GlobalConstants;
+import hiberspring.domain.dto.EmployeeSeedRootDto;
+import hiberspring.domain.entity.Branch;
+import hiberspring.domain.entity.Employee;
+import hiberspring.domain.entity.EmployeeCard;
+import hiberspring.repository.EmployeeRepository;
+import hiberspring.service.*;
+import hiberspring.util.ValidationUtil;
+import hiberspring.util.XmlParser;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class EmployeeServiceImpl implements EmployeeService {
+    private final ModelMapper modelMapper;
+    private final ValidationUtil validationUtil;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeCardService employeeCardService;
+    private final BranchService branchService;
+    private final XmlParser xmlParser;
+    private final ProductService productService;
+
+    @Autowired
+    public EmployeeServiceImpl(ModelMapper modelMapper,
+                               ValidationUtil validationUtil,
+                               EmployeeRepository employeeRepository,
+                               TownService townService, EmployeeCardService employeeCardService,
+                               BranchService branchService, XmlParser xmlParser, ProductService productService) {
+        this.modelMapper = modelMapper;
+        this.validationUtil = validationUtil;
+        this.employeeRepository = employeeRepository;
+        this.employeeCardService = employeeCardService;
+        this.branchService = branchService;
+        this.xmlParser = xmlParser;
+        this.productService = productService;
+    }
+
+
+    @Override
+    public Boolean employeesAreImported() {
+        return this.employeeRepository.count() > 0;
+    }
+
+    @Override
+    public String readEmployeesXmlFile() throws IOException {
+        return Files.readString(Path.of(GlobalConstants.EMPLOYEES_FILE_PATH));
+    }
+
+    @Override
+    public String importEmployees() throws JAXBException, FileNotFoundException {
+        StringBuilder stringBuilder = new StringBuilder();
+        EmployeeSeedRootDto employeeSeedRootDto = this.xmlParser.parseXml(EmployeeSeedRootDto.class,
+                GlobalConstants.EMPLOYEES_FILE_PATH);
+
+        employeeSeedRootDto.getEmployees().forEach(employeeSeedDto -> {
+            if (this.validationUtil.isValid(employeeSeedDto)) {
+                if (this.employeeRepository.findByFirstNameAndLastNameAndPosition(employeeSeedDto.getFirstName(),
+                        employeeSeedDto.getLastName(), employeeSeedDto.getPosition()) == null) {
+                    Employee employee = this.modelMapper.map(employeeSeedDto, Employee.class);
+                    EmployeeCard card = this.employeeCardService.getByNumber(employeeSeedDto.getCard());
+                    Branch branch = this.branchService.getByName(employeeSeedDto.getBranch());
+                    if (card == null || branch == null) {
+                        stringBuilder.append("Error: invalid data.");
+                    } else {
+                        employee.setBranch(branch);
+                        employee.setCard(card);
+                        this.employeeRepository.saveAndFlush(employee);
+                        stringBuilder.append(String.format("Successfully imported Employee %s %s.",
+                                employee.getFirstName(), employee.getLastName()));
+                    }
+
+                } else {
+                    stringBuilder.append("This employee is already in the data base.");
+                }
+
+            } else {
+                stringBuilder.append("Error: invalid data.");
+            }
+            stringBuilder.append(System.lineSeparator());
+        });
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public String exportProductiveEmployees() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Set<Branch> branches = this.productService.getBranchesWithProducts();
+        List<Employee> employees = new ArrayList<>();
+        for (Branch branch : branches) {
+            employees.addAll(this.employeeRepository
+                    .findAllByBranch(branch));
+        }
+        employees.sort(Comparator.comparing(Employee::getFirstName).thenComparing(Employee::getLastName));
+        employees.forEach(empl -> {
+            stringBuilder.append(String.format("Name: %s %s%n" +
+                            "Position: %s%n" +
+                            "Card Number: %s%n" +
+                            "-------------------------%n", empl.getFirstName(), empl.getLastName(), empl.getPosition(),
+                    empl.getCard().getNumber()));
+        });
+        return stringBuilder.toString();
+    }
+
+
+    @Override
+    public Employee getByFirstNameLastNamePosition(String fName, String lName, String position) {
+        return this.employeeRepository.findByFirstNameAndLastNameAndPosition(fName, lName, position);
+    }
+}
